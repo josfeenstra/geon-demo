@@ -1,0 +1,28 @@
+{
+  "name": "geon-demo",
+  "version": "0.1.4",
+  "author": "Jos Feenstra",
+  "license": "MIT",
+  "description": "Lightweight 3d geometry library + 3d renderer",
+  "scripts": {
+    "build": "webpack --mode=development",
+    "production": "webpack --mode=production",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch"
+  },
+  "keywords": [
+    "geon",
+    "geometry",
+    "3d",
+    "engine",
+    "geomatics"
+  ],
+  "devDependencies": {
+    "ts-loader": ">=8.0.5",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.3.5",
+    "webpack": "^5.41.1",
+    "webpack-cli": ">=4.0.0",
+    "webpack-dev-server": ">=3.11.0"
+  }
+}
