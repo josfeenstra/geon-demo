@@ -18,7 +18,7 @@ module.exports = (env) => {
                     // explain how to compile 'external' library
                     loader: "ts-loader",
                     test: /\.ts$/,
-                    include: [path.resolve(__dirname, "../engine/src")],
+                    include: [path.resolve(__dirname, PATH_TO_GEON, "src")],
                 },
             ],
         },
@@ -26,8 +26,8 @@ module.exports = (env) => {
             // make external library linkable
             extensions: [".ts", ".js"],
             alias: {
-                Geon: [path.resolve(__dirname, "../engine/src/lib")],
-                Engine: [path.resolve(__dirname, "../engine/src")]
+                Geon: [path.resolve(__dirname, PATH_TO_GEON, "src/lib")],
+                Engine: [path.resolve(__dirname, PATH_TO_GEON, "src")]
             }
         },
         output: {

@@ -9,7 +9,7 @@
     "skipLibCheck": true,                     
     "forceConsistentCasingInFileNames": false,  
     
-    /* */
+    /* This is so we can quickly travel to the dependencies */
     "baseUrl": ".",
     "paths": {
         "Geon": ["../engine/src/lib"],
