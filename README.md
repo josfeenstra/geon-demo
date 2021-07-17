@@ -1,16 +1,14 @@
-# geon-engine
-A no-dependency 3D engine for delivering interactive 3d experiences on the web. 
-Think barebones three.js, but with a focus on parametric design / procedural generation.
-
-## Current Project within Geon
-- Irregular quadrilateral partition of space
+# geon-demo
+A number of demo project showcasing various features of the [Geon Engine](https://github.com/josfeenstra/geon-engine).
 
 
-## Demo
+## Live
 http://josfeenstra.nl/demo/geon/
 
 
 ## Install 
+
+
 ```
 git clone https://github.com/josfeenstra/eyefinder-ts
 cd geon-engine 
