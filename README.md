@@ -7,7 +7,6 @@ https://josfeenstra.nl/demo/geon/
 
 
 ## Install 
-
 Please note: this uses webpack-based direct dependencies instead of npm / yarn based dependencies for workflow related reasons. 
 
 ```

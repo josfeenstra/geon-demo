@@ -32,12 +32,12 @@ module.exports = (env) => {
         },
         output: {
             filename: "index.js",
-            path: path.resolve(__dirname, "build"),
+            path: path.resolve(__dirname, "public"),
         },
         devServer: {
             filename: "index.js",
             lazy: true,
-            contentBase: path.join(__dirname, "build"),
+            contentBase: path.join(__dirname, "public"),
         },
         optimization: {
             minimizer: [

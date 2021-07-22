@@ -12,8 +12,8 @@ import {
     Context,
     UI,
     Plane,
+    MultiRenderer,
 } from "Geon";
-import { MultiRenderer } from "Engine/render/multi-renderer";
 
 export class MultiRendererApp extends App {
     // ui
@@ -27,7 +27,7 @@ export class MultiRendererApp extends App {
     // render
     camera: Camera;
     mr: MultiRenderer;
-    gs: LineShader; 
+    gs: LineShader;
     constructor(gl: WebGLRenderingContext) {
         super(gl);
 
@@ -42,10 +42,6 @@ export class MultiRendererApp extends App {
         this.startGrid();
 
         // create something!
-
-
-
-
     }
 
     ui(ui: UI) {}

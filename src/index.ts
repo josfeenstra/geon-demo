@@ -2,7 +2,7 @@
 // Author:  Jos Feenstra
 // Purpose: Entry point
 
-import { Core, FpsCounter, Shader, SwapApp } from "Geon";
+import { Core, FpsCounter, HelpGl, Shader, SwapApp } from "Geon";
 
 import { DotApp3 } from "./apps/dot-app3";
 import { SphericalTwoApp } from "./apps/spherical/spherical-two-app";
@@ -32,7 +32,7 @@ function main() {
     let ui = document.getElementById("interface") as HTMLDivElement;
 
     // init core
-    let gl = Shader.initWebglContext(canvas);
+    let gl = HelpGl.initWebglContext(canvas);
     core = new Core(canvas, gl, ui);
 
     // init swap app
@@ -63,10 +63,10 @@ function main() {
     let defaultIndex = 0;
     swapApp.swapFromUrl(location.hash, defaultIndex);
 
-    // time 
+    // time
     let accumulated = 0;
     let counter = FpsCounter.new();
-    
+
     // infinite loop
     function loop(elapsed: number) {
         let dt = elapsed - accumulated;
