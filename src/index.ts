@@ -2,7 +2,7 @@
 // Author:  Jos Feenstra
 // Purpose: Entry point
 
-import { Core, FpsCounter, HelpGl, Shader, SwapApp } from "Geon";
+import { Core, FpsCounter, SwapApp } from "Geon";
 
 import { DotApp3 } from "./apps/dot-app3";
 import { SphericalTwoApp } from "./apps/spherical/spherical-two-app";
@@ -23,6 +23,8 @@ import { PerlinLinesApp } from "./apps/math/perlin-lines-app";
 import { BezierCpApp } from "./apps/math/bezier-cp-app";
 import { SurfaceCpApp } from "./apps/math/surface-cp-app";
 import { MultiRendererApp } from "./apps/util/renderer-app";
+import { BillboardApp } from "./apps/billboard-app";
+import { HelpGl } from "Engine/render-low/webgl";
 
 var core: Core;
 
@@ -37,7 +39,7 @@ function main() {
 
     // init swap app
     let appCollection = [
-        MultiRendererApp,
+        BillboardApp,
         PerlinApp,
         SurfaceApp,
         BezierApp,
