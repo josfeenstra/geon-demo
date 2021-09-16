@@ -19,8 +19,6 @@ import {
     Random,
     MultiRenderer,
 } from "Geon";
-// import { MultiRenderer } from "Engine/render/multi-renderer";
-import { DotShaderWithHeight } from "Engine/shaders/dot-shader-with-height";
 
 export class MultiRendererApp extends App {
     

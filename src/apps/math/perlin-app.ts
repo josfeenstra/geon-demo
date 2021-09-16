@@ -23,7 +23,7 @@ import {
     MultiVector3,
 } from "Geon";
 import { Random } from "Engine/math/random";
-import { DotShaderWithHeight } from "Engine/shaders/dot-shader-with-height";
+import { DotShaderWithHeight } from "Engine/shaderprograms/dot-shader-with-height";
 
 export class PerlinApp extends App {
     // ui

@@ -20,6 +20,9 @@ import {
     BillboardShader,
     Domain3,
     Domain2,
+    MultiVector2,
+    Vector2,
+    BillboardPayload,
 } from "Geon";
 
 export class BillboardApp extends App {
@@ -57,13 +60,26 @@ export class BillboardApp extends App {
         this.ir.state.push(texture);
         this.ir.buffer();
 
+        let xcount = 16;
+        let ycount = 16;
 
-        let positions = Domain2.fromRadius(10).spawn(16, 16).to3D();
-        let uvs = Domain2.fromBounds(0,16, 0,16).spawn(16,16);
-        let uvSizes = Domain2.fromRadius(10).spawn(10,10);
+        let spriteWidth = texture.width / xcount;
+        let spriteHeight = texture.height / ycount;
+        // console.log(spriteWidth, spriteHeight);
 
-        this.br.set({positions, uvs, uvSizes, texture}, DrawSpeed.StaticDraw);
-        // create something!
+
+        let positions = Domain2.fromRadius(10).spawn(xcount, ycount).to3D();
+        
+        let uvs = Domain2.fromBounds(0,texture.width-spriteWidth, 0,texture.height-spriteHeight).spawn(xcount, ycount);
+        console.log(uvs);
+        let sizes = [];
+        for(let i = 0 ; i < uvs.count; i++) {
+            sizes.push(Vector2.new(spriteWidth, spriteHeight));
+        }
+        let uvSizes = MultiVector2.fromList(sizes);
+        console.log(sizes);
+        let payload: BillboardPayload = {positions, uvs, uvSizes, texture};
+        this.br.set(payload, DrawSpeed.StaticDraw);
     }
 
     ui(ui: UI) {}
