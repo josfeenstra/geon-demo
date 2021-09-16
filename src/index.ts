@@ -39,6 +39,7 @@ function main() {
 
     // init swap app
     let appCollection = [
+        MultiRendererApp,
         BillboardApp,
         PerlinApp,
         SurfaceApp,

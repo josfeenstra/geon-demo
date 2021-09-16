@@ -1,5 +1,7 @@
 // purpose: demonstrate new renderer capabilities
 
+import { ImageMesh } from "Engine/geometry/ImageMesh";
+import { TransformLineShader } from "Engine/shaders/transform-line-shader";
 import {
     App,
     DotShader,
@@ -18,6 +20,10 @@ import {
     Polyline,
     Random,
     MultiRenderer,
+    GeonImage,
+    Billboard,
+    TextureMeshShader,
+    Mesh,
 } from "Geon";
 
 export class MultiRendererApp extends App {
@@ -27,12 +33,13 @@ export class MultiRendererApp extends App {
 
     // state
     points!: MultiVector3;
+    rng!: Random;
 
     // render
     camera: Camera;
     mr: MultiRenderer;
     gs: LineShader; 
-    rng!: Random;
+    tms: TextureMeshShader;
 
     constructor(gl: WebGLRenderingContext) {
         super(gl);
@@ -43,6 +50,7 @@ export class MultiRendererApp extends App {
         this.camera.set(-2, 1, 1);
         this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
         this.mr = MultiRenderer.new(gl);
+        this.tms = TextureMeshShader.new(gl);
     }
 
     start() {
@@ -50,15 +58,24 @@ export class MultiRendererApp extends App {
         this.rng = Random.fromSeed(10394);
 
         // render a bunch of dots
-        this.points = Domain3.fromRadius(5).populate(100, this.rng);
-        this.mr.set(this.points, "dots");
+        this.points = Domain3.fromRadius(10).populate(100, this.rng);
+        // this.mr.set(Domain3.fromRadius(10).populate(100, this.rng), "dots2")
+        // this.mr.set(this.points, "dots");
 
+        let img = GeonImage.new(7, 7);
+        img.forEach((x, y) => {return [Math.random() * 255, y, 255, 1];});
+
+        let someMesh = Mesh.newIcosahedron(5).ToShaderMesh();
+        someMesh.texture = img.toImageData();
+        this.mr.set(ImageMesh.new(img, Vector3.new(0,0,0), Vector3.new(0,0,1), 1), "image");
+        // this.tms.set(someMesh, DrawSpeed.StaticDraw);
+        // this.tms.set(ImageMesh.new(img).buffer(), DrawSpeed.StaticDraw);
         // render a line
         let lines = Polyline.new(this.points);
-        this.mr.set(lines);
+        // this.mr.set(lines);
         
         // render a plane at each point
-        this.points.forEach(v => this.mr.set(Plane.WorldXZ().moveTo(v)));
+        // this.points.forEach(v => this.mr.set(Plane.WorldXZ().moveTo(v)));
     }
 
     ui(ui: UI) {}
@@ -71,8 +88,8 @@ export class MultiRendererApp extends App {
     update(state: InputState) {
         this.camera.update(state);
 
-        this.points.forEach(v => v.add(Vector3.fromRandomUnit(this.rng)))        
-        this.mr.set(this.points, "dots");
+        // this.points.forEach(v => v.add(Vector3.fromRandomUnit(this.rng)))        
+        // this.mr.set(this.points, "dots");
     }
 
     draw(gl: WebGLRenderingContext) {
@@ -81,5 +98,6 @@ export class MultiRendererApp extends App {
         let c = new Context(this.camera);
         this.gs.render(c);
         this.mr.render(c);
+        // this.tms.render(c);
     }
 }
