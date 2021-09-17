@@ -15,7 +15,6 @@ import {
     MultiRenderer,
     loadImageFromFile,
     loadImageFromSrc,
-    ImageCombi,
     GeonImage,
     BillboardShader,
     Domain3,
@@ -23,6 +22,7 @@ import {
     MultiVector2,
     Vector2,
     BillboardPayload,
+    ImageRenderer,
 } from "Geon";
 
 export class BillboardApp extends App {
@@ -36,7 +36,7 @@ export class BillboardApp extends App {
     camera: Camera;
     mr: MultiRenderer;
     gs: LineShader;
-    ir: ImageCombi;
+    ir: ImageRenderer;
     br: BillboardShader;
 
     constructor(gl: WebGLRenderingContext) {
@@ -47,7 +47,8 @@ export class BillboardApp extends App {
         this.camera.set(-2, 1, 1);
         this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
         this.mr = MultiRenderer.new(gl);
-        this.ir = ImageCombi.new(gl);
+        this.ir = ImageRenderer.new(gl);
+        this.ir.scale = 0.2;
         this.br = new BillboardShader(gl);
     }
 
@@ -57,7 +58,7 @@ export class BillboardApp extends App {
         let imgData = await loadImageFromSrc("./data/textures/minecraft.png");
         let texture = GeonImage.fromImageData(imgData);
         // img = img.trim(16,16,32,32);
-        this.ir.state.push(texture);
+        this.ir.add(texture);
         this.ir.buffer();
 
         let xcount = 16;
@@ -71,13 +72,13 @@ export class BillboardApp extends App {
         let positions = Domain2.fromRadius(10).spawn(xcount, ycount).to3D();
         
         let uvs = Domain2.fromBounds(0,texture.width-spriteWidth, 0,texture.height-spriteHeight).spawn(xcount, ycount);
-        console.log(uvs);
+        // console.log(uvs);
         let sizes = [];
         for(let i = 0 ; i < uvs.count; i++) {
             sizes.push(Vector2.new(spriteWidth, spriteHeight));
         }
         let uvSizes = MultiVector2.fromList(sizes);
-        console.log(sizes);
+        // console.log(sizes);
         let payload: BillboardPayload = {positions, uvs, uvSizes, texture};
         this.br.set(payload, DrawSpeed.StaticDraw);
     }

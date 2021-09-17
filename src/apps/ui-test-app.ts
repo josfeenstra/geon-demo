@@ -12,7 +12,7 @@ import {
     Matrix4,
     App,
     UI,
-    ImageCombi,
+    ImageRenderer,
     GeonImage,
     Context,
     Parameter,
@@ -21,7 +21,7 @@ import { DuoParameter } from "Engine/ui/duo-parameter";
 
 export class UITestApp extends App {
     context: Context;
-    images: ImageCombi;
+    images: ImageRenderer;
 
     param!: DuoParameter;
 
@@ -30,7 +30,7 @@ export class UITestApp extends App {
 
         let canvas = gl.canvas as HTMLCanvasElement;
         this.context = new Context(new Camera(canvas));
-        this.images = ImageCombi.new(gl);
+        this.images = ImageRenderer.new(gl);
     }
 
     ui(ui: UI) {
@@ -48,7 +48,8 @@ export class UITestApp extends App {
     start() {
         let img = new GeonImage(10, 10, 4);
         img.fill([255, 255, 255, 255]);
-        this.images.state.push(img);
+        this.images.add(img);
+        this.images.buffer();
     }
 
     update(state: InputState) {

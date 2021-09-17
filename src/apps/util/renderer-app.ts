@@ -30,6 +30,7 @@ export class MultiRendererApp extends App {
     
     // ui
     params: Parameter[] = [];
+    interface?: UI;
 
     // state
     points!: MultiVector3;
@@ -59,26 +60,38 @@ export class MultiRendererApp extends App {
 
         // render a bunch of dots
         this.points = Domain3.fromRadius(10).populate(100, this.rng);
-        // this.mr.set(Domain3.fromRadius(10).populate(100, this.rng), "dots2")
-        // this.mr.set(this.points, "dots");
+        this.mr.set(Domain3.fromRadius(10).populate(100, this.rng), "dots2")
+        this.mr.set(this.points, "dots");
 
-        let img = GeonImage.new(7, 7);
+        // three images
+        let w = 8;
+        let h = 8;
+        let img = GeonImage.new(w, h);
         img.forEach((x, y) => {return [Math.random() * 255, y, 255, 1];});
+        this.mr.set(ImageMesh.new(img, Vector3.new(4,0,0), Vector3.new(1,0,0), 1), "image1");
+        img.forEach((x, y) => {return [255, Math.random() * 255, 255, 1];});
+        this.mr.set(ImageMesh.new(img, Vector3.new(0,4,0), Vector3.new(0,1,0), 1), "image2");
+        img.forEach((x, y) => {return [255, 255, Math.random() * 255, 1];});
+        this.mr.set(ImageMesh.new(img, Vector3.new(0,0,4), Vector3.new(0,0,1), 1), "image3");
+        img.forEach((x, y) => {return [Math.random() * 255, y, 255, 1];});
+        this.mr.set(ImageMesh.new(img, Vector3.new(-4,0,0), Vector3.new(1,0,0), 1), "image4");
+        img.forEach((x, y) => {return [255, Math.random() * 255, 255, 1];});
+        this.mr.set(ImageMesh.new(img, Vector3.new(0,-4,0), Vector3.new(0,1,0), 1), "image5");
+        img.forEach((x, y) => {return [255, 255, Math.random() * 255, 1];});
+        this.mr.set(ImageMesh.new(img, Vector3.new(0,0,-4), Vector3.new(0,0,1), 1), "image6");
 
-        let someMesh = Mesh.newIcosahedron(5).ToShaderMesh();
-        someMesh.texture = img.toImageData();
-        this.mr.set(ImageMesh.new(img, Vector3.new(0,0,0), Vector3.new(0,0,1), 1), "image");
-        // this.tms.set(someMesh, DrawSpeed.StaticDraw);
-        // this.tms.set(ImageMesh.new(img).buffer(), DrawSpeed.StaticDraw);
+
         // render a line
         let lines = Polyline.new(this.points);
-        // this.mr.set(lines);
+        this.mr.set(lines);
         
         // render a plane at each point
-        // this.points.forEach(v => this.mr.set(Plane.WorldXZ().moveTo(v)));
+        this.points.forEach(v => this.mr.set(Plane.WorldXZ().moveTo(v)));
     }
 
-    ui(ui: UI) {}
+    ui(ui: UI) {
+        this.interface = ui;
+    }
 
     startGrid() {
         let grid = MultiLine.fromGrid(Plane.WorldXY().moveTo(new Vector3(0, 0, -1)), 100, 2);
