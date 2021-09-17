@@ -12,7 +12,7 @@ import {
     Context,
     UI,
     Plane,
-    MultiRenderer,
+    DebugRenderer,
     loadImageFromFile,
     loadImageFromSrc,
     GeonImage,
@@ -34,7 +34,7 @@ export class BillboardApp extends App {
  
     // render
     camera: Camera;
-    mr: MultiRenderer;
+    mr: DebugRenderer;
     gs: LineShader;
     ir: ImageRenderer;
     br: BillboardShader;
@@ -46,7 +46,7 @@ export class BillboardApp extends App {
         this.camera = new Camera(canvas, -2, true);
         this.camera.set(-2, 1, 1);
         this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
-        this.mr = MultiRenderer.new(gl);
+        this.mr = DebugRenderer.new(gl);
         this.ir = ImageRenderer.new(gl);
         this.ir.scale = 0.2;
         this.br = new BillboardShader(gl);

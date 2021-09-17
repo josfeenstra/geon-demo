@@ -19,7 +19,7 @@ import {
     Domain3,
     Polyline,
     Random,
-    MultiRenderer,
+    DebugRenderer,
     GeonImage,
     Billboard,
     TextureMeshShader,
@@ -38,7 +38,7 @@ export class MultiRendererApp extends App {
 
     // render
     camera: Camera;
-    mr: MultiRenderer;
+    mr: DebugRenderer;
     gs: LineShader; 
     tms: TextureMeshShader;
 
@@ -50,7 +50,7 @@ export class MultiRendererApp extends App {
         this.camera = new Camera(canvas, -2, true);
         this.camera.set(-2, 1, 1);
         this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
-        this.mr = MultiRenderer.new(gl);
+        this.mr = DebugRenderer.new(gl);
         this.tms = TextureMeshShader.new(gl);
     }
 
@@ -86,11 +86,13 @@ export class MultiRendererApp extends App {
         this.mr.set(lines);
         
         // render a plane at each point
-        this.points.forEach(v => this.mr.set(Plane.WorldXZ().moveTo(v)));
+        // this.points.forEach(v => this.mr.set(Plane.WorldXZ().moveTo(v)));
+        this.mr.addUi(this.interface!);
     }
 
     ui(ui: UI) {
         this.interface = ui;
+        
     }
 
     startGrid() {

@@ -12,7 +12,7 @@ import {
     Context,
     UI,
     Plane,
-    MultiRenderer,
+    DebugRenderer,
 } from "Geon";
 
 export class MultiRendererApp extends App {
@@ -26,7 +26,7 @@ export class MultiRendererApp extends App {
 
     // render
     camera: Camera;
-    mr: MultiRenderer;
+    mr: DebugRenderer;
     gs: LineShader;
     constructor(gl: WebGLRenderingContext) {
         super(gl);
@@ -35,7 +35,7 @@ export class MultiRendererApp extends App {
         this.camera = new Camera(canvas, -2, true);
         this.camera.set(-2, 1, 1);
         this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
-        this.mr = MultiRenderer.new(gl);
+        this.mr = DebugRenderer.new(gl);
     }
 
     start() {
