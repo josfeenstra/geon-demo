@@ -1,24 +1,25 @@
 // author : Jos Feenstra
 // purpose : test with Renderers, Domains & Vectors
 
-import { App, Vector2, Domain2, DotShader2, InputState, Context, Camera } from "Geon";
-import { Random } from "Engine/math/random";
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { App, Vector2, Domain2, Scene, Camera, Random, InputState } from "Geon";
+
 
 export class DotApp2 extends App {
     dots: Vector2[] = [];
     dirs: Vector2[] = [];
 
     bounds: Domain2;
-    renderer: DotShader2;
-    context: Context;
+    renderer: DotShader;
+    context: Scene;
 
     // unique constructors
     constructor(gl: WebGLRenderingContext) {
         super(gl);
         let canvas = gl.canvas as HTMLCanvasElement;
         this.bounds = Domain2.fromBounds(0, 500, 0, 500);
-        this.renderer = new DotShader2(gl, 5, [1, 1, 1, 1], true);
-        this.context = new Context(new Camera(canvas, 1, false));
+        this.renderer = new DotShader(gl, 5, [1, 1, 1, 1], true);
+        this.context = new Scene(new Camera(canvas, 1, false));
     }
 
     start() {

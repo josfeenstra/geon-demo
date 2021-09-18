@@ -1,31 +1,12 @@
-import {
-    App,
-    DotShader,
-    LineShader,
-    SimpleMeshShader,
-    Camera,
-    ShaderMesh,
-    Vector3,
-    MultiLine,
-    FloatMatrix,
-    Stat,
-    InputState,
-    UI,
-    Parameter,
-    MultiVector3,
-    Domain3,
-    Matrix4,
-    DrawSpeed,
-    Plane,
-    Matrix3,
-    Context,
-} from "Geon";
-import { Random } from "Engine/math/random";
 
 // good sites explaining the power of least squares
 // https://courses.physics.illinois.edu/cs357/sp2020/notes/ref-17-least-squares.html
 // http://textbooks.math.gatech.edu/ila/least-squares.html
 // https://www.cc.gatech.edu/classes/AY2016/cs4476_fall/results/proj3/html/cpaulus3/index.html
+
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { App, Parameter, Random, MultiVector3, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, Matrix4, InputState, Scene, Domain3, FloatMatrix, Stat } from "Geon";
 
 export class LeastSquaresApp extends App {
     // ui
@@ -208,7 +189,7 @@ export class LeastSquaresApp extends App {
         // get to-screen matrix
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
 
         this.lineRenderer.render(c);
         this.drRed.setAndRender(this.points, c);

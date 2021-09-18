@@ -3,33 +3,17 @@
 // author : Jos Feenstra
 // purpose : test with Renderers, Domains & Vectors
 
-import {
-    Domain3,
-    DotShader,
-    Camera,
-    Vector3,
-    InputState,
-    Matrix4,
-    App,
-    UI,
-    ImageRenderer,
-    GeonImage,
-    Context,
-    Parameter,
-} from "Geon";
-import { DuoParameter } from "Engine/ui/duo-parameter";
+import { App, ImageRenderer, Camera, UI, GeonImage, InputState, Scene } from "Geon";
 
 export class UITestApp extends App {
-    context: Context;
+    context: Scene;
     images: ImageRenderer;
-
-    param!: DuoParameter;
 
     constructor(gl: WebGLRenderingContext) {
         super(gl);
 
         let canvas = gl.canvas as HTMLCanvasElement;
-        this.context = new Context(new Camera(canvas));
+        this.context = new Scene(new Camera(canvas));
         this.images = ImageRenderer.new(gl);
     }
 
@@ -37,12 +21,6 @@ export class UITestApp extends App {
         let canvas = ui.addElement("canvas", "duo-param-canvas") as HTMLCanvasElement;
         canvas.width = 400;
         canvas.height = 400;
-
-        this.param = DuoParameter.new(
-            canvas,
-            new Parameter("x", 0, 0, 1, 0.01),
-            new Parameter("y", 0, 0, 1, 0.01),
-        );
     }
 
     start() {

@@ -1,19 +1,5 @@
-import {
-    App,
-    DotShader,
-    LineShader,
-    Camera,
-    Vector3,
-    MultiLine,
-    InputState,
-    Parameter,
-    MultiVector3,
-    DrawSpeed,
-    Context,
-    UI,
-    Plane,
-    DebugRenderer,
-} from "Geon";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene } from "Geon";
 
 export class MultiRendererApp extends App {
     // ui
@@ -58,7 +44,7 @@ export class MultiRendererApp extends App {
     draw(gl: WebGLRenderingContext) {
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
         this.gs.render(c);
         this.mr.render(c);
     }

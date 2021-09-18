@@ -2,22 +2,10 @@
 // author:  Jos Feenstra
 // purpose: test statistic functionalties
 
-import {
-    App,
-    Camera,
-    ShadedMeshShader,
-    Parameter,
-    Graph,
-    ShaderMesh,
-    Vector3,
-    UI,
-    InputState,
-    Matrix4,
-    DrawSpeed,
-    Mesh,
-    NormalShader,
-    Context,
-} from "Geon";
+import { NormalShader } from "Engine/render/shaders-old/mesh-normals-shader";
+import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
+import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene } from "Geon";
+
 
 export class IcosahedronApp extends App {
     camera: Camera;
@@ -139,7 +127,7 @@ export class IcosahedronApp extends App {
     }
 
     draw(gl: WebGLRenderingContext) {
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
         this.meshRend.render(c);
         // this.normalRend.render(gl, this.camera);
     }

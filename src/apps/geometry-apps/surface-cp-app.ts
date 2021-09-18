@@ -1,30 +1,7 @@
-import { Bezier } from "Engine/geo/curve/bezier";
-import { BezierSquare } from "Engine/geo/surface/bezier-square";
-import { Loft } from "Engine/geo/surface/loft";
-import {
-    App,
-    Parameter,
-    Vector3,
-    MultiLine,
-    Camera,
-    DotShader,
-    LineShader,
-    MeshDebugShader,
-    UI,
-    Polyline,
-    Plane,
-    DrawSpeed,
-    InputState,
-    Context,
-    Domain3,
-    Util,
-    Domain2,
-    MultiVector2,
-    Perlin,
-    Circle3,
-    Mesh,
-} from "Geon";
-import { Random } from "Engine/math/random";
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
+import { App, Parameter, Vector3, MultiLine, Plane, BezierSquare, Camera, Random, UI, Domain2, DrawSpeed, InputState, Mesh, Scene } from "Geon";
 
 export class SurfaceCpApp extends App {
     // ui
@@ -138,7 +115,7 @@ export class SurfaceCpApp extends App {
     draw(gl: WebGLRenderingContext) {
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
 
         this.lrRed.setAndRender(MultiLine.fromJoin(this.lines), c);
         this.drBlue.render(c);

@@ -1,20 +1,12 @@
-import {
-    App,
-    DotShader,
-    LineShader,
-    SimpleMeshShader,
-    Camera,
-    ShaderMesh,
-    Vector3,
-    MultiLine,
-    FloatMatrix,
-    Stat,
-    InputState,
-} from "Geon";
 
 // good sites explaining the power of least squares
 // https://courses.physics.illinois.edu/cs357/sp2020/notes/ref-17-least-squares.html
 // http://textbooks.math.gatech.edu/ila/least-squares.html
+
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { SimpleMeshShader } from "Engine/render/shaders-old/simple-mesh-shader";
+import { App, Camera, ShaderMesh, Vector3, MultiLine, FloatMatrix, Stat, InputState } from "Geon";
 
 export class StatApp extends App {
     dotRenderer: DotShader;

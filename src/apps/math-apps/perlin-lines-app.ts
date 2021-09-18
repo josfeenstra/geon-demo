@@ -1,32 +1,8 @@
 // NOTE: splines are not nearly efficient enough for this kind of business :).
 
-import { Bezier } from "Engine/geo/curve/bezier";
-import { BezierSquare } from "Engine/geo/surface/bezier-square";
-import { Loft } from "Engine/geo/surface/loft";
-import {
-    App,
-    Parameter,
-    Vector3,
-    MultiLine,
-    Camera,
-    DotShader,
-    LineShader,
-    UI,
-    Polyline,
-    Plane,
-    DrawSpeed,
-    InputState,
-    Context,
-    Domain3,
-    Util,
-    Domain2,
-    MultiVector2,
-    Perlin,
-    MultiVector3,
-    Spline,
-} from "Geon";
-import { Random } from "Engine/math/random";
-import { DotShaderWithHeight } from "Engine/shaderprograms/dot-shader-with-height";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { App, Parameter, Perlin, MultiVector3, Camera, DotShaderWithHeight, Random, UI, Domain2, Vector3, DrawSpeed, MultiLine, Plane, InputState, Spline, Scene } from "Geon";
+
 
 export class PerlinLinesApp extends App {
     // ui
@@ -128,7 +104,7 @@ export class PerlinLinesApp extends App {
     }
 
     draw(gl: WebGLRenderingContext) {
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
 
         this.drRed.render(c);
         this.lrGrid.render(c);

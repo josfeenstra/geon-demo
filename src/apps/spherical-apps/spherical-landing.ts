@@ -2,41 +2,11 @@
 // - improve quadification: less triangles!
 // - improve squarification: speed & equal sizes
 
-import {
-    App,
-    Camera,
-    ShadedMeshShader,
-    Parameter,
-    Graph,
-    ShaderMesh,
-    Vector3,
-    UI,
-    InputState,
-    Matrix4,
-    DrawSpeed,
-    Mesh,
-    Cube,
-    Plane,
-    Domain3,
-    MeshDebugShader,
-    VertIndex,
-    EdgeIndex,
-    EnumParameter,
-    GraphDebugShader,
-    Context,
-    Vector2,
-    GeonMath,
-    Const,
-} from "Geon";
-
-import { Stopwatch } from "Engine/system/stopwatch";
-import { constructMeshFromSphereGraph, createGraph } from "./spherical";
-import { graphToMultiMesh } from "../icosahedron-app";
-import { averageEdgeLength, laPlacian, quadification, squarification } from "./spherical";
-import { StaticMeshCombo } from "Engine/combo/mesh-combo";
+import { App, Parameter, EnumParameter, Graph, Vector3, Vector2, Camera, UI, InputState, GeonMath, Matrix4, Const, Scene, MeshBufferer } from "Geon";
+import { createGraph, averageEdgeLength, constructMeshFromSphereGraph } from "./spherical";
 
 export class SphericalLandingApp extends App {
-    c: Context;
+    c: Scene;
 
     rotate!: Parameter;
     inner!: Parameter;
@@ -53,7 +23,7 @@ export class SphericalLandingApp extends App {
     smoothlimit = 0;
     cca?: number;
 
-    worlds: StaticMeshCombo[] = [];
+    worlds: MeshBufferer[] = [];
 
     lerpCameraPos!: Vector3;
     lerpCameraOri!: Vector3;
@@ -77,7 +47,7 @@ export class SphericalLandingApp extends App {
         super(gl, "Multiple Layers of spherical geometry");
 
         let canvas = gl.canvas as HTMLCanvasElement;
-        this.c = new Context(new Camera(canvas, 1, false, false));
+        this.c = new Scene(new Camera(canvas, 1, false, false));
 
         // this.c.camera.pos = new Vector3(
         //     -0.41347096487880547,
@@ -140,7 +110,7 @@ export class SphericalLandingApp extends App {
             let top = levels[i + 1];
             let freq = freqs[i];
 
-            let mc = StaticMeshCombo.new(this.gl);
+            let mc = MeshBufferer.new(this.gl);
             mc.set(constructMeshFromSphereGraph(this.graph, this.radius, bot, top, freq));
             this.worlds.push(mc);
         }

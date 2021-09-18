@@ -1,37 +1,14 @@
-// TODO
-// - improve quadification: less triangles!
-// - improve squarification: speed & equal sizes
+// landing page
 
-import {
-    App,
-    Camera,
-    ShadedMeshShader,
-    Parameter,
-    Graph,
-    ShaderMesh,
-    Vector3,
-    UI,
-    InputState,
-    Matrix4,
-    DrawSpeed,
-    Mesh,
-    Cube,
-    Plane,
-    Domain3,
-    MeshDebugShader,
-    VertIndex,
-    EdgeIndex,
-    EnumParameter,
-    GraphDebugShader,
-    Context,
-} from "Geon";
+import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
+import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
+import { App, Parameter, EnumParameter, Graph, ShaderMesh, Scene, Camera, UI, Mesh, Vector3, DrawSpeed, InputState, Matrix4 } from "Geon";
+import { quadification, averageEdgeLength, constructMeshFromSphereGraph, squarification, laPlacian } from "./spherical";
 
-import { Stopwatch } from "Engine/system/stopwatch";
-import { averageEdgeLength, laPlacian, quadification, squarification } from "./spherical";
 
-export class SphericalOneApp extends App {
-    camera: Camera;
-    meshRend: ShadedMeshShader;
+export class SphericalTwoApp extends App {
+    c: Scene;
+    meshRend: MeshDebugShader;
     debugRend: MeshDebugShader;
     graphRend: GraphDebugShader;
 
@@ -51,18 +28,20 @@ export class SphericalOneApp extends App {
     smoothlimit = 0;
     cca?: number;
 
-    constructor(gl: WebGLRenderingContext) {
-        super(
-            gl,
-            "setup for trying out different partitions of a sphere. Based on Oskar Stalberg's irregular quad grid",
-        );
-        let canvas = gl.canvas as HTMLCanvasElement;
-        this.camera = new Camera(canvas, 1, true);
-        this.camera.set(-4.48, 1.24, -0.71);
+    world!: ShaderMesh;
+    world2!: ShaderMesh;
+    world3!: ShaderMesh;
 
-        this.meshRend = new ShadedMeshShader(gl);
-        this.debugRend = new MeshDebugShader(gl, [0.5, 0, 0, 1], [1, 0, 0, 1], false);
-        this.graphRend = new GraphDebugShader(gl, [0.5, 0, 0, 1], [255 / 255, 69 / 255, 0, 1]);
+    constructor(gl: WebGLRenderingContext) {
+        super(gl, "Multiple Layers of spherical geometry");
+
+        let canvas = gl.canvas as HTMLCanvasElement;
+        this.c = new Scene(new Camera(canvas, 1, true));
+        this.c.camera.set(-4.08, 1.24, -0.71);
+        // this.meshRend = new ShadedMeshRenderer(gl);
+        this.meshRend = new MeshDebugShader(gl, [0, 0, 0, 1], [0.3, 0.3, 0.3, 1], false);
+        this.debugRend = new MeshDebugShader(gl, [0.5, 0, 0, 1], [0, 0, 0, 1], false);
+        this.graphRend = new GraphDebugShader(gl, [0.5, 0.5, 0.5, 1], [1, 1, 1, 1]);
     }
 
     ui(ui: UI) {
@@ -71,8 +50,8 @@ export class SphericalOneApp extends App {
             this.start();
         };
 
-        this.rotate = new Parameter("rotate", 0, 0, 1, 1);
-        this.randomEdges = new Parameter("randomEdges", 1, 0, 1, 1);
+        this.rotate = new Parameter("rotate", 1, 0, 1, 1);
+        this.randomEdges = new Parameter("delete edges", 1, 0, 1, 1);
         this.smooth = new Parameter("smooth", 0, 0, 1, 1);
         this.subCount = new Parameter("sub count", 2, 0, 4, 1);
         this.quadSubCount = new Parameter("sub count quad", 1, 0, 2, 1);
@@ -102,10 +81,6 @@ export class SphericalOneApp extends App {
             this.radius = graph.getVertexPos(0).disTo(center);
         }
 
-        // DEBUG: PERFORMANCE
-        console.log("lets start subdivisions!");
-        let stopwatch = Stopwatch.new();
-
         // 1 | subdivide
         for (let i = 0; i < this.subCount.get(); i++) {
             graph.subdivide();
@@ -125,50 +100,18 @@ export class SphericalOneApp extends App {
                         pos.add(normal.normalized().scaled(lift));
                     }
                 }
-                console.log("lift in ", stopwatch.time(), "ms");
             }
         }
-
-        // DEBUG: PERFORMANCE
-        console.log("subdivision in ", stopwatch.time(), "ms");
 
         // 2 | remove random edges
         if (this.randomEdges.get() == 1) {
             quadification(graph);
-
-            // graph.print();
-            // 2 | remove random edges
-            // let edges = graph.all();
-            // let picks: number[] = [];
-            // let pickCount = 100;
-            // for (let i = 0 ; i < pickCount; i++) {
-
-            //     let p = randomInt(edges.length);
-            //     picks.push(edges[p]);
-            // }
-
-            // // // console.log(picks);
-
-            // for (let i = 0 ; i < edges.length; i++) {
-            //     if (Math.random() > 0.0) {
-            //         let ei = edges[i];
-            //         let loops = graph.getLoopsAdjacentToEdge(ei);
-            //         if (loops[0].length == 3 && loops[1].length == 3) {
-            //             graph.deleteEdgeFromIndex(edges[i]);
-            //         }
-            //     }
-            // }
         }
-
-        console.log("edge removal in ", stopwatch.time(), "ms");
 
         // 3 | subdivide quad
         for (let i = 0; i < this.quadSubCount.get(); i++) {
             graph.subdivideQuad();
         }
-
-        // DEBUG: PERFORMANCE
-        console.log("quad subdivision in ", stopwatch.time(), "ms");
 
         // lift to sphere after every subdivision
         if (liftType > 0) {
@@ -185,55 +128,58 @@ export class SphericalOneApp extends App {
                     pos.add(normal.normalized().scaled(lift));
                 }
             }
-            console.log("lift in ", stopwatch.time(), "ms");
         }
 
         // 4 | quad relaxation
         this.graph = graph;
 
-        // this.rend = this.graph.toRenderable();
-        // this.rend = graphToMultiMesh(this.graph, 0.02, 3, false, true);
-        // this.rend.calculateVertexNormals();
-        // console.log("num triangles = ", this.rend.mesh.links.count());
-        // console.log("to renderable in ", stopwatch.time(), "ms");
-
-        // this.graph.print();
-        // let loops = graph.allVertLoopsAsInts();
-        // console.log("allVertLoops in ", stopwatch.time(), "ms");
-        //console.log(loops);
-
         // 5 | convert
-
-        if (liftType == 1) {
-            let somesphere = Mesh.newSphere(
-                Vector3.zero(),
-                this.radius * 0.99,
-                6,
-                10,
-            ).ToShaderMesh();
-            somesphere.calculateVertexNormals();
-            this.meshRend.set(somesphere, DrawSpeed.StaticDraw);
-        } else if (liftType == 0) {
-            let something = mesh.ToShaderMesh();
-            something.transform(Matrix4.newScaler(0.99, 0.99, 0.99));
-            something.calculateFaceNormals();
-            this.meshRend.set(something, DrawSpeed.StaticDraw);
-        }
-
         this.graphRend.set(this.graph, DrawSpeed.DynamicDraw);
         this.average = averageEdgeLength(this.graph);
-        // console.log("edges: ", this.graph.allEdges());
-        // console.log("loops: ", this.graph.allVertLoops());
+
+        this.bufferWorld();
+    }
+
+    bufferWorld() {
+        this.world = constructMeshFromSphereGraph(
+            this.graph,
+            this.radius,
+            0,
+            0.1,
+            0.6,
+        ).ToShaderMesh();
+        this.world2 = constructMeshFromSphereGraph(
+            this.graph,
+            this.radius,
+            0.1,
+            0.2,
+            0.4,
+        ).ToShaderMesh();
+        this.world3 = constructMeshFromSphereGraph(
+            this.graph,
+            this.radius,
+            0.2,
+            0.3,
+            0.2,
+        ).ToShaderMesh();
     }
 
     update(state: InputState) {
-        this.camera.update(state);
+        this.c.camera.update(state);
 
-        if (!state.mouseRightDown && this.rotate.get() == 1) {
+        let pulse = Math.sin(state.newTime);
+
+        // rotate mesh
+        if (this.rotate.get() == 1) {
             // rotate
             let alpha = 0.0001 * state.tick;
-            let rot = Matrix4.newXRotation(alpha).multiply(Matrix4.newYRotation(alpha));
+            let rotx = Matrix4.newXRotation(alpha);
+            let roty = Matrix4.newYRotation(alpha);
+            let rot = rotx.multiply(roty);
             this.graph.transform(rot);
+            this.world.transform(rot);
+            this.world2.transform(Matrix4.newXRotation(-alpha));
+            this.world3.transform(Matrix4.newZRotation(-alpha));
         }
 
         // sucessive over relaxation
@@ -253,17 +199,20 @@ export class SphericalOneApp extends App {
                     v.pos.add(normal.normalized().scaled(lift));
                 });
                 this.smoothlimit += 1;
+                this.bufferWorld();
             }
         } else {
             this.smoothlimit = 0;
         }
 
-        this.graphRend.set(this.graph, DrawSpeed.DynamicDraw);
+        // this.graphRend.set(this.graph, DrawSpeed.DynamicDraw);
     }
 
     draw(gl: WebGLRenderingContext) {
-        let c = new Context(this.camera);
-        this.meshRend.render(c);
-        this.graphRend.render(c);
+        for (let world of [this.world, this.world2, this.world3]) {
+            this.meshRend.setAndRender(world, this.c);
+        }
+
+        // this.graphRend.render(gl, this.camera);
     }
 }

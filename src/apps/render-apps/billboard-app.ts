@@ -1,29 +1,5 @@
-import {
-    App,
-    DotShader,
-    LineShader,
-    Camera,
-    Vector3,
-    MultiLine,
-    InputState,
-    Parameter,
-    MultiVector3,
-    DrawSpeed,
-    Context,
-    UI,
-    Plane,
-    DebugRenderer,
-    loadImageFromFile,
-    loadImageFromSrc,
-    GeonImage,
-    BillboardShader,
-    Domain3,
-    Domain2,
-    MultiVector2,
-    Vector2,
-    BillboardPayload,
-    ImageRenderer,
-} from "Geon";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, ImageRenderer, BillboardShader, loadImageFromSrc, GeonImage, Domain2, Vector2, MultiVector2, BillboardPayload, DrawSpeed, UI, MultiLine, Plane, Vector3, InputState, Scene } from "Geon";
 
 export class BillboardApp extends App {
     // ui
@@ -97,7 +73,7 @@ export class BillboardApp extends App {
     draw(gl: WebGLRenderingContext) {
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
         this.gs.render(c);
         this.mr.render(c);
         this.ir.render(c);

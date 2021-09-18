@@ -1,30 +1,8 @@
 // purpose: demonstrate new renderer capabilities
 
-import { ImageMesh } from "Engine/geometry/ImageMesh";
-import { TransformLineShader } from "Engine/shaders/transform-line-shader";
-import {
-    App,
-    DotShader,
-    LineShader,
-    Camera,
-    Vector3,
-    MultiLine,
-    InputState,
-    Parameter,
-    MultiVector3,
-    DrawSpeed,
-    Plane,
-    Context,
-    UI,
-    Domain3,
-    Polyline,
-    Random,
-    DebugRenderer,
-    GeonImage,
-    Billboard,
-    TextureMeshShader,
-    Mesh,
-} from "Geon";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { TextureMeshShader } from "Engine/render/shaders-old/texture-mesh-shader";
+import { App, Parameter, UI, MultiVector3, Random, Camera, DebugRenderer, Domain3, Vector3, GeonImage, ImageMesh, Polyline, Plane, MultiLine, DrawSpeed, InputState, Scene } from "Geon";
 
 export class MultiRendererApp extends App {
     
@@ -63,6 +41,9 @@ export class MultiRendererApp extends App {
         this.mr.set(Domain3.fromRadius(10).populate(100, this.rng), "dots2")
         this.mr.set(this.points, "dots");
 
+        // render vectors 
+        this.points.forEach(v => v.add(Vector3.fromRandomUnit(this.rng)))   
+
         // three images
         let w = 8;
         let h = 8;
@@ -82,17 +63,15 @@ export class MultiRendererApp extends App {
 
 
         // render a line
-        let lines = Polyline.new(this.points);
-        this.mr.set(lines);
-        
+        this.mr.set(Polyline.new(this.points));
+        this.mr.set(Plane.WorldXZ().moveTo(this.points.get(0)), "plane");
         // render a plane at each point
         // this.points.forEach(v => this.mr.set(Plane.WorldXZ().moveTo(v)));
         this.mr.addUi(this.interface!);
     }
 
     ui(ui: UI) {
-        this.interface = ui;
-        
+        this.interface = ui; 
     }
 
     startGrid() {
@@ -102,17 +81,15 @@ export class MultiRendererApp extends App {
 
     update(state: InputState) {
         this.camera.update(state);
-
-        // this.points.forEach(v => v.add(Vector3.fromRandomUnit(this.rng)))        
-        // this.mr.set(this.points, "dots");
+        this.points.forEach(v => v.add(Vector3.fromRandomUnit(this.rng)))        
+        this.mr.set(this.points, "dots");
     }
 
     draw(gl: WebGLRenderingContext) {
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
         this.gs.render(c);
         this.mr.render(c);
-        // this.tms.render(c);
     }
 }

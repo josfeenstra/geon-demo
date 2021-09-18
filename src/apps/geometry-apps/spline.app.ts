@@ -1,31 +1,7 @@
-import { Bezier } from "Engine/geo/curve/bezier";
-import { BezierSquare } from "Engine/geo/surface/bezier-square";
-import { Loft } from "Engine/geo/surface/loft";
-import {
-    App,
-    Parameter,
-    Vector3,
-    MultiLine,
-    Camera,
-    DotShader,
-    LineShader,
-    MeshDebugShader,
-    UI,
-    Polyline,
-    Plane,
-    DrawSpeed,
-    InputState,
-    Context,
-    Util,
-    Domain2,
-    Domain3,
-    MultiVector3,
-    Circle3,
-    Spline,
-} from "Geon";
-import { Polynomial } from "Engine/math/polynomial";
-import { Random } from "Engine/math/random";
-import { Stopwatch } from "Engine/system/stopwatch";
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
+import { App, Parameter, Vector3, MultiLine, Camera, UI, Domain3, Random, Spline, Circle3, Plane, DrawSpeed, InputState, Scene } from "Geon";
 
 export class SplineApp extends App {
     // ui
@@ -115,7 +91,7 @@ export class SplineApp extends App {
     draw(gl: WebGLRenderingContext) {
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
 
         this.lrGrid.render(c);
         this.drRed.setAndRender(this.dots, c);

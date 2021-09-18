@@ -2,24 +2,12 @@
 // author:  Jos Feenstra
 // purpose: test creation of basic mesh shapes. Test UI
 
-import {
-    App,
-    Camera,
-    DotShader,
-    LineShader,
-    MeshDebugShader,
-    ShadedMeshShader,
-    Plane,
-    MultiLine,
-    ShaderMesh,
-    Parameter,
-    UI,
-    Vector3,
-    Mesh,
-    InputState,
-    EnumParameter,
-    Context,
-} from "Geon";
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
+import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
+import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene } from "Geon";
+
 
 export class MeshInspectorApp extends App {
     // renderinfo
@@ -134,7 +122,7 @@ export class MeshInspectorApp extends App {
 
     draw(gl: WebGLRenderingContext) {
         // TODO abstract this to 'scene'
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
         let matrix = this.camera.totalMatrix;
         this.dotRenderer.render(c);
 

@@ -1,44 +1,20 @@
-// name:    obj-loader-app.ts
+// name:    geometry-app.ts
 // author:  Jos Feenstra
-// purpose: test statistic functionalties
+// purpose: a 3d voxel environment to toy around in. Uses several features of geon
 
-import {
-    App,
-    DotShader,
-    LineShader,
-    MeshDebugShader,
-    Camera,
-    Plane,
-    MultiLine,
-    Vector3,
-    ShaderMesh,
-    IntCube,
-    Perlin,
-    InputState,
-    Mesh,
-    Ray,
-    Matrix4,
-    Cube,
-    Domain3,
-    Context,
-} from "Geon";
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
+import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
+import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3 } from "Geon";
 
-// TODO: MAKE IT 3D
-// - 3D matrix (sounds stupid i know)
-// - improve visuals slightly (no surface between cubes)
-// - place at normal
-// - block ray cast-> pick first
-
-// TODO: MARCHING WAVE FUNCTION COLLAPSE
-// - how to make interesting prototypes, but still use a bitmap data model?
-
-export class MarchingCubeApp extends App {
+export class GeometryApp extends App {
     // renderinfo
     dotRenderer: DotShader;
     whiteLineRenderer: LineShader;
     greyLineRenderer: LineShader;
     redLineRenderer: LineShader;
-    meshRenderer: MeshDebugShader;
+    meshRenderer: ShadedMeshShader;
     transMeshRenderer: MeshDebugShader;
     camera: Camera;
 
@@ -52,39 +28,57 @@ export class MarchingCubeApp extends App {
     cursorVisual?: MultiLine;
 
     // logic data
-    size = 2;
+    size = 50;
     cellSize = 1;
     map!: IntCube;
 
-    constructor(gl: WebGLRenderingContext, canvas: HTMLCanvasElement) {
+    pov = new Parameter("pov", 80, 10, 100, 1);
+
+    constructor(gl: WebGLRenderingContext) {
         // setup render env
         super(gl);
-        this.camera = new Camera(canvas);
+        this.camera = new Camera(gl.canvas! as HTMLCanvasElement, 10, true);
         this.dotRenderer = new DotShader(gl, 4, [1, 0, 0, 1], false);
         this.whiteLineRenderer = new LineShader(gl, [1, 1, 1, 1]);
         this.greyLineRenderer = new LineShader(gl, [0.2, 0, 1, 0.5]);
         this.redLineRenderer = new LineShader(gl, [0.8, 0, 0, 1]);
-        this.meshRenderer = new MeshDebugShader(gl, [0.9, 0.9, 0.9, 1], [0.7, 0.7, 0.7, 1]);
-        this.transMeshRenderer = new MeshDebugShader(gl, [1, 1, 1, 0.1], [1, 1, 1, 0.1]);
+        this.meshRenderer = new ShadedMeshShader(gl);
+        this.transMeshRenderer = new MeshDebugShader(gl, [1, 1, 1, 0.25], [1, 1, 1, 0.25]);
     }
 
+    // called after init
     start() {
         this.map = new IntCube(this.size, this.size, this.size);
         this.map.fill(0);
 
-        let perlin = new Perlin();
-        let scale = 0.2;
-        this.map.map((value, i) => {
-            let c = this.map.getCoords(i);
-
-            let noise = perlin.noise(c.x * scale, c.y * scale, c.z * scale);
-
-            if (noise > 0.6) {
+        // add random blocks in the world
+        this.map.map((value, index) => {
+            if (Math.random() > 0.99) {
                 return 1;
             } else {
                 return value;
             }
         });
+
+        // let perlin = new Perlin();
+        // this.map.map((value, i) => {
+
+        //     let c = this.map.getCoords(i);
+
+        //     let scale = 0.05;
+        //     let noise = perlin.noise(c.x * scale, c.y * scale, c.z * scale);
+
+        //     if (i < 10) {
+        //         console.log(c);
+        //         console.log(noise);
+        //     }
+
+        //     if (noise > 0.60) {
+        //         return 1;
+        //     } else {
+        //         return value;
+        //     }
+        // })
 
         // console.log("done setting")
 
@@ -100,6 +94,10 @@ export class MarchingCubeApp extends App {
         // this.greyLineRenderer.set(this.gl, this.gridSmall, DrawSpeed.StaticDraw);
     }
 
+    ui(ui: UI) {
+        ui.addParameter(this.pov);
+    }
+
     update(state: InputState) {
         // move the camera with the mouse
         this.camera.update(state);
@@ -111,8 +109,7 @@ export class MarchingCubeApp extends App {
         // get to-screen matrix
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
-
+        let c = new Scene(this.camera);
         // render the grid
         // this.greyLineRenderer.render(gl, matrix);
         // this.whiteLineRenderer.render(gl, matrix);
@@ -124,9 +121,9 @@ export class MarchingCubeApp extends App {
         this.meshRenderer.render(c);
 
         // render other things
-        // for (let geo of this.geo) {
-        //     this.transMeshRenderer.setAndRender(gl, matrix, geo);
-        // }
+        for (let geo of this.geo) {
+            this.transMeshRenderer.setAndRender(geo, c);
+        }
     }
 
     addPreviewCube(point: Vector3) {
@@ -161,9 +158,12 @@ export class MarchingCubeApp extends App {
             return;
         }
 
-        // preview
         let cubeCursor = this.map.getCoords(cubeIDprevious);
         this.addPreviewCube(cubeCursor);
+
+        // render cube at this position
+
+        // this.geo.push(Mesh.fromCube(cube));
 
         // click
         if (state.mouseLeftPressed) {
@@ -276,7 +276,6 @@ export class MarchingCubeApp extends App {
     // flush this.meshRenderer
     // turn this.map into this.mapGeo
     bufferMap() {
-        console.log("buffering");
         let mapGeo: Mesh[] = [];
         this.map.iter((entry, index) => {
             if (entry == 1) {
@@ -286,7 +285,10 @@ export class MarchingCubeApp extends App {
                 mapGeo.push(Mesh.fromCube(cube));
             }
         });
-        this.meshRenderer.set(Mesh.fromJoin(mapGeo).ToShaderMesh());
+
+        let m = Mesh.fromJoin(mapGeo).ToShaderMesh();
+        m.calculateFaceNormals();
+        this.meshRenderer.set(m);
     }
 
     worldToMap(coord: Vector3): Vector3 {

@@ -2,24 +2,10 @@
 // author:  Jos Feenstra
 // purpose: drag an obj to the canvas, and view it on the web
 
-import {
-    App,
-    DotShader,
-    LineShader,
-    MeshDebugShader,
-    Camera,
-    ShaderMesh,
-    MultiLine,
-    addDropFileEventListeners,
-    InputState,
-    MultiVector3,
-    Vector3,
-    loadTextFromFile,
-    meshFromObj,
-    Domain3,
-    DrawSpeed,
-    Context,
-} from "Geon";
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { LineShader } from "Engine/render/shaders-old/line-shader";
+import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
+import { App, Camera, ShaderMesh, MultiLine, addDropFileEventListeners, InputState, Scene, MultiVector3, Vector3, loadTextFromFile, meshFromObj, Domain3, DrawSpeed } from "Geon";
 
 export class ObjLoaderApp extends App {
     dotRenderer: DotShader;
@@ -52,7 +38,7 @@ export class ObjLoaderApp extends App {
 
     draw(gl: WebGLRenderingContext) {
         // get to-screen matrix
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
 

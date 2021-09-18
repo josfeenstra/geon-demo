@@ -3,41 +3,11 @@
 // - improve squarification: speed & equal sizes
 // - Make big sphere and funky texture dancing around on it
 
-import {
-    App,
-    Camera,
-    ShadedMeshShader,
-    Parameter,
-    Graph,
-    ShaderMesh,
-    Vector3,
-    UI,
-    InputState,
-    Matrix4,
-    DrawSpeed,
-    Mesh,
-    Cube,
-    Plane,
-    Domain3,
-    MeshDebugShader,
-    VertIndex,
-    EdgeIndex,
-    EnumParameter,
-    GraphDebugShader,
-    IntMatrix,
-    Context,
-} from "Geon";
-
-import {
-    averageEdgeLength,
-    laPlacian,
-    quadification,
-    squarification,
-    createGraph,
-    createTileWorld,
-    meshifyTileWorld,
-    meshifyGraphSurface,
-} from "./spherical";
+import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
+import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
+import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
+import { App, Parameter, Graph, ShaderMesh, Camera, IntMatrix, UI, InputState, Matrix4, Vector3, Scene, DrawSpeed } from "Geon";
+import { createGraph, createTileWorld, averageEdgeLength, meshifyTileWorld, meshifyGraphSurface, squarification, laPlacian } from "./spherical";
 
 //
 //
@@ -145,7 +115,7 @@ export class SphericalThreeApp extends App {
     }
 
     draw(gl: WebGLRenderingContext) {
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
         this.meshRend.setShallow(this.gl, this.world);
         this.meshRend.render(c);
 

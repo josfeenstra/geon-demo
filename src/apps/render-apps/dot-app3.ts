@@ -3,17 +3,8 @@
 // author : Jos Feenstra
 // purpose : test with Renderers, Domains & Vectors
 
-import {
-    Domain3,
-    DotShader,
-    Camera,
-    Vector3,
-    InputState,
-    Matrix4,
-    App,
-    Context,
-    Random,
-} from "Geon";
+import { DotShader } from "Engine/render/shaders-old/dot-shader";
+import { App, Vector3, Domain3, Camera, Random, InputState, Scene, Matrix4 } from "Geon";
 
 export class DotApp3 extends App {
     dots: Vector3[] = [];
@@ -84,7 +75,7 @@ export class DotApp3 extends App {
         // get to-screen matrix
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Context(this.camera);
+        let c = new Scene(this.camera);
 
         // render the corners of the box with the red renderer,
         // and the dots themselves with the white renderer
