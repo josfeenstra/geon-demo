@@ -88,8 +88,8 @@ export class MultiRendererApp extends App {
     draw(gl: WebGLRenderingContext) {
         const canvas = gl.canvas as HTMLCanvasElement;
         let matrix = this.camera.totalMatrix;
-        let c = new Scene(this.camera);
-        this.gs.render(c);
-        this.mr.render(c);
+        let scene = new Scene(this.camera);
+        this.gs.render(scene);
+        this.mr.render(scene);
     }
 }

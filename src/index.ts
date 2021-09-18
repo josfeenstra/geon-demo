@@ -20,7 +20,7 @@ import { SphericalThreeApp } from "./apps/spherical-apps/spherical-three-app";
 import { SphericalTwoApp } from "./apps/spherical-apps/spherical-two-app";
 import { MeshInspectorApp } from "./apps/util-apps/mesh-inspector-app";
 import { ObjLoaderApp } from "./apps/util-apps/obj-loader-app";
-import { MultiRendererApp } from "./template-app";
+import { MultiRendererApp } from "./apps/util-apps/renderer-app";
 
 
 var core: Core;
