@@ -7,6 +7,7 @@ import { BezierApp } from "./apps/geometry-apps/bezier-app";
 import { BezierCpApp } from "./apps/geometry-apps/bezier-cp-app";
 import { IcosahedronApp } from "./apps/geometry-apps/icosahedron-app";
 import { LoftApp } from "./apps/geometry-apps/loft-app";
+import { MarchingCubeApp } from "./apps/geometry-apps/marching-cube-app";
 import { SplineApp } from "./apps/geometry-apps/spline.app";
 import { SurfaceApp } from "./apps/geometry-apps/surface-app";
 import { SurfaceCpApp } from "./apps/geometry-apps/surface-cp-app";
@@ -18,7 +19,7 @@ import { GeometryApp } from "./apps/render-apps/geometry-app";
 import { SphericalOneApp } from "./apps/spherical-apps/spherical-one-app";
 import { SphericalThreeApp } from "./apps/spherical-apps/spherical-three-app";
 import { SphericalTwoApp } from "./apps/spherical-apps/spherical-two-app";
-import { MeshInspectorApp } from "./apps/util-apps/mesh-inspector-app";
+import { MeshInspectorApp } from "./apps/render-apps/mesh-inspector-app";
 import { ObjLoaderApp } from "./apps/util-apps/obj-loader-app";
 import { MultiRendererApp } from "./apps/util-apps/renderer-app";
 
@@ -36,6 +37,7 @@ function main() {
 
     // init swap app
     let appCollection = [
+        // MarchingCubeApp,
         MultiRendererApp,
         BillboardApp,
         PerlinApp,

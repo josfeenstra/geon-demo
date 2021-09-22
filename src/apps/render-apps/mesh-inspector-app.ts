@@ -6,7 +6,8 @@ import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene } from "Geon";
+import { AmbientMeshShader } from "Engine/render/shaders/AmbientMeshShader";
+import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed } from "Geon";
 
 
 export class MeshInspectorApp extends App {
@@ -16,6 +17,7 @@ export class MeshInspectorApp extends App {
     lineRenderer: LineShader;
     meshRenderer: MeshDebugShader;
     shadedMeshRenderer: ShadedMeshShader;
+    ams: AmbientMeshShader;
 
     // geo data
     plane: Plane = Plane.WorldXY();
@@ -29,7 +31,7 @@ export class MeshInspectorApp extends App {
     distance = new Parameter("distance", 3.0, 0, 4.0, 0.01);
     radius = new Parameter("radius", 1.0, 0, 4.0, 0.01);
     detail = new Parameter("detail", 5, 0, 100, 1);
-    shademethod = EnumParameter.new("render method", 0, ["debug", "vertex shaded", "face shaded"]);
+    shademethod = EnumParameter.new("render method", 3, ["debug", "vertex shaded", "face shaded", "ambient only"]);
 
     constructor(gl: WebGLRenderingContext) {
         // setup render env
@@ -37,7 +39,7 @@ export class MeshInspectorApp extends App {
         let canvas = gl.canvas as HTMLCanvasElement;
 
         // TODO abstract this to scene
-        this.camera = new Camera(canvas);
+        this.camera = new Camera(canvas, undefined, true);
         this.camera.z_offset = -10;
         this.camera.angleAlpha = 0.4;
         this.camera.angleBeta = 0.5;
@@ -46,6 +48,7 @@ export class MeshInspectorApp extends App {
         this.meshRenderer = new MeshDebugShader(gl, [0.6, 0, 0, 1], [1, 0, 0, 1]);
         this.lineRenderer = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
         this.shadedMeshRenderer = new ShadedMeshShader(gl);
+        this.ams = new AmbientMeshShader(gl);
     }
 
     ui(ui: UI) {
@@ -61,6 +64,10 @@ export class MeshInspectorApp extends App {
 
         ui.addParameter(this.detail, (value) => {
             this.start();
+        });
+
+        ui.addParameter(new Parameter("ambient-color", 0, 0, 1, 0.01), (value) => {
+            this.ams.loadColor([value, value, value, 1]);
         });
 
         // render methods
@@ -102,13 +109,23 @@ export class MeshInspectorApp extends App {
 
         // TODO abstract this to scene
         console.log("normal type", rend.getNormalType());
-        if (this.shademethod.get() == 0) {
-            this.meshRenderer.set(rend);
-        } else if (this.shademethod.get() == 1) {
-            this.shadedMeshRenderer.set(rend);
-        } else {
-            rend.calculateFaceNormals();
-            this.shadedMeshRenderer.set(rend);
+
+        switch(this.shademethod.get()) {
+            case 0:
+                this.meshRenderer.set(rend);
+                break;
+            case 1:
+                this.shadedMeshRenderer.set(rend);
+                break;
+            case 2:
+                rend.calculateFaceNormals();
+                this.shadedMeshRenderer.set(rend);
+                break;
+            case 3:
+                this.ams.load(rend.mesh, DrawSpeed.StaticDraw);
+                break;
+            default:
+                break;
         }
 
         this.lineRenderer.set(grid);
@@ -123,15 +140,22 @@ export class MeshInspectorApp extends App {
     draw(gl: WebGLRenderingContext) {
         // TODO abstract this to 'scene'
         let c = new Scene(this.camera);
-        let matrix = this.camera.totalMatrix;
         this.dotRenderer.render(c);
 
-        if (this.shademethod.get() == 0) {
-            this.meshRenderer.render(c);
-        } else {
-            this.shadedMeshRenderer.render(c);
+        switch(this.shademethod.get()) {
+            case 0:
+                this.meshRenderer.render(c);
+                break;
+            case 1:
+            case 2:
+                this.shadedMeshRenderer.render(c);
+                break;
+            case 3:
+                this.ams.draw(c);
+                break;
+            default:
+                break;
         }
-
         this.lineRenderer.render(c);
     }
 }

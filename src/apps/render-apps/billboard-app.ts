@@ -56,7 +56,7 @@ export class BillboardApp extends App {
         let uvSizes = MultiVector2.fromList(sizes);
         // console.log(sizes);
         let payload: BillboardPayload = {positions, uvs, uvSizes, texture};
-        this.br.set(payload, DrawSpeed.StaticDraw);
+        this.br.load(payload, DrawSpeed.StaticDraw);
     }
 
     ui(ui: UI) {}
@@ -77,6 +77,6 @@ export class BillboardApp extends App {
         this.gs.render(c);
         this.mr.render(c);
         this.ir.render(c);
-        this.br.render(c);
+        this.br.draw(c);
     }
 }

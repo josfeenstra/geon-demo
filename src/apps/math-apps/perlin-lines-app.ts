@@ -67,7 +67,7 @@ export class PerlinLinesApp extends App {
 
         // save them, and put them in the renderer, which we need if we are not updating for perlin effect
         this.dots = vecs3;
-        this.drRed.set(vecs3, DrawSpeed.StaticDraw);
+        this.drRed.load(vecs3, DrawSpeed.StaticDraw);
     }
 
     startGrid() {
@@ -106,7 +106,7 @@ export class PerlinLinesApp extends App {
     draw(gl: WebGLRenderingContext) {
         let c = new Scene(this.camera);
 
-        this.drRed.render(c);
+        this.drRed.draw(c);
         this.lrGrid.render(c);
         this.lrRed.render(c);
     }

@@ -63,7 +63,7 @@ export class PerlinApp extends App {
 
         // save them, and put them in the renderer, which we need if we are not updating for perlin effect
         this.dots = vecs3;
-        this.drRed.set(vecs3, DrawSpeed.StaticDraw);
+        this.drRed.load(vecs3, DrawSpeed.StaticDraw);
     }
 
     startGrid() {
@@ -85,7 +85,7 @@ export class PerlinApp extends App {
                 v.z = n;
                 news.set(i, v);
             }
-            this.drRed.set(news, DrawSpeed.DynamicDraw);
+            this.drRed.load(news, DrawSpeed.DynamicDraw);
         }
     }
 
@@ -93,6 +93,6 @@ export class PerlinApp extends App {
         let c = new Scene(this.camera);
 
         this.lrGrid.render(c);
-        this.drRed.render(c);
+        this.drRed.draw(c);
     }
 }
