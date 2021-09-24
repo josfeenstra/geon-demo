@@ -138,12 +138,32 @@ export class PhongApp extends App {
         ]);
         mesh.ensureUVs();
         mesh.calcAndSetVertexNormals();
+        this.calcAmbientOcclusion(mesh, this.plane);
 
         // let model = new Model(Matrix4.newIdentity(), rend.mesh, this.material);
         let model2 = new Model(Matrix4.newTranslate(this.somePos), mesh, this.material);
         // this.phong.load(model, DrawSpeed.StaticDraw);
         this.phong.load(model2, DrawSpeed.StaticDraw);
         this.lineRenderer.set(grid);
+    }
+
+    /**
+     * A very dumb version of ambient occlusion 
+     */
+    calcAmbientOcclusion(mesh: Mesh, plane: Plane) {
+        let count = mesh.verts.count
+        let data = new Float32Array(count);
+
+        let maxDistance = 0.5;
+        for (let i = 0 ; i < count; i++) {
+            
+            // the closer to the base plane, the more ambient occlusion
+            let v = mesh.verts.get(i).added(this.somePos);
+            let distance = plane.distanceTo(v);
+            data[i] = Math.max(Math.min(maxDistance - (distance / maxDistance), 0.5), 0.0);
+        }
+
+        this.phong.loadOcclusion(data, DrawSpeed.StaticDraw);
     }
 
     update(state: InputState) {
