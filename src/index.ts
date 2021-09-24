@@ -22,6 +22,9 @@ import { SphericalTwoApp } from "./apps/spherical-apps/spherical-two-app";
 import { MeshInspectorApp } from "./apps/render-apps/mesh-inspector-app";
 import { ObjLoaderApp } from "./apps/util-apps/obj-loader-app";
 import { MultiRendererApp } from "./apps/util-apps/renderer-app";
+import { PhongApp } from "./apps/render-apps/phong-app";
+import { CubesPhongApp } from "./apps/render-apps/cubes-phong-app";
+import { ZebraApp } from "./apps/render-apps/zebra-app";
 
 
 var core: Core;
@@ -37,7 +40,10 @@ function main() {
 
     // init swap app
     let appCollection = [
+        ZebraApp,
+        CubesPhongApp,
         // MarchingCubeApp,
+        PhongApp,
         MultiRendererApp,
         BillboardApp,
         PerlinApp,
@@ -50,7 +56,6 @@ function main() {
         SphericalOneApp,
         SphericalTwoApp,
         SphericalThreeApp,
-        GeometryApp,
         IcosahedronApp,
         DotApp3,
         LeastSquaresApp,
