@@ -41,7 +41,7 @@ export class CubesPhongApp extends App {
         super(gl);
         let camera = new Camera(gl.canvas! as HTMLCanvasElement, 10, true);
         this.scene = new Scene(camera);
-        this.phongShader = new PhongShader(gl, false);
+        this.phongShader = new PhongShader(gl);
         this.dr = DebugRenderer.new(gl);
         this.ds = new DepthMeshShader(gl);
     }

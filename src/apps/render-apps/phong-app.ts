@@ -54,7 +54,7 @@ export class PhongApp extends App {
 
         this.lineRenderer = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
         // this.phong = new PhongShader(gl);
-        this.phong = new PhongShader(gl, true);
+        this.phong = new PhongShader(gl);
     }
 
     ui(ui: UI) {

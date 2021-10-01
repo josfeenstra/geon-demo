@@ -38,8 +38,8 @@ export class MultiRendererApp extends App {
 
         // render a bunch of dots
         this.points = Domain3.fromRadius(10).populate(100, this.rng);
-        this.mr.set(Domain3.fromRadius(10).populate(100, this.rng), "dots2")
-        this.mr.set(this.points, "dots");
+        this.mr.set(Domain3.fromRadius(10).populate(100, this.rng), "dots2", 10, [0,1,0,1])
+        this.mr.set(this.points, "dots", 10, [1,0,0,1]);
 
         // render vectors 
         this.points.forEach(v => v.add(Vector3.fromRandomUnit(this.rng)))   
@@ -48,18 +48,21 @@ export class MultiRendererApp extends App {
         let w = 8;
         let h = 8;
         let img = GeonImage.new(w, h);
+        
         img.forEach((x, y) => {return [Math.random() * 255, y, 255, 1];});
-        this.mr.set(ImageMesh.new(img, Vector3.new(4,0,0), Vector3.new(1,0,0), 1), "image1");
+        this.mr.set(ImageMesh.new(img, Plane.WorldYZ().moveTo(Vector3.new(4,0,0))), "image1");
         img.forEach((x, y) => {return [255, Math.random() * 255, 255, 1];});
-        this.mr.set(ImageMesh.new(img, Vector3.new(0,4,0), Vector3.new(0,1,0), 1), "image2");
+        this.mr.set(ImageMesh.new(img, Plane.WorldYZ().moveTo(Vector3.new(-4,0,0)), 1), "image2");
+        
         img.forEach((x, y) => {return [255, 255, Math.random() * 255, 1];});
-        this.mr.set(ImageMesh.new(img, Vector3.new(0,0,4), Vector3.new(0,0,1), 1), "image3");
+        this.mr.set(ImageMesh.new(img, Plane.WorldXZ().moveTo(Vector3.new(0,-4,0)), 1), "image3");
         img.forEach((x, y) => {return [Math.random() * 255, y, 255, 1];});
-        this.mr.set(ImageMesh.new(img, Vector3.new(-4,0,0), Vector3.new(1,0,0), 1), "image4");
+        this.mr.set(ImageMesh.new(img, Plane.WorldXZ().moveTo(Vector3.new(0,-4,0)), 1), "image4");
+        
         img.forEach((x, y) => {return [255, Math.random() * 255, 255, 1];});
-        this.mr.set(ImageMesh.new(img, Vector3.new(0,-4,0), Vector3.new(0,1,0), 1), "image5");
+        this.mr.set(ImageMesh.new(img, Plane.WorldXY().moveTo(Vector3.new(0,0,4)), 1), "image5");
         img.forEach((x, y) => {return [255, 255, Math.random() * 255, 1];});
-        this.mr.set(ImageMesh.new(img, Vector3.new(0,0,-4), Vector3.new(0,0,1), 1), "image6");
+        this.mr.set(ImageMesh.new(img, Plane.WorldXY().moveTo(Vector3.new(0,0,-4)), 1), "image6");
 
 
         // render a line

@@ -25,9 +25,9 @@ import { MultiRendererApp } from "./apps/util-apps/renderer-app";
 import { PhongApp } from "./apps/render-apps/phong-app";
 import { CubesPhongApp } from "./apps/render-apps/cubes-phong-app";
 import { ZebraApp } from "./apps/render-apps/zebra-app";
+import { TorusApp } from "./apps/geometry-apps/torus-app";
+import { ImageProcessingApp } from "./apps/scientific-apps/image-processing-app";
 
-
-var core: Core;
 
 function main() {
     // get references of all items on the canvas
@@ -35,11 +35,16 @@ function main() {
     let ui = document.getElementById("interface") as HTMLDivElement;
 
     // init core
-    let gl = HelpGl.initWebglContext(canvas);
-    core = new Core(canvas, gl, ui);
+    let gl = HelpGl.initWebglContext(canvas)!;
+    let core = new Core(canvas, gl, ui);
+
+    //@ts-ignore
+    window.core = core;
 
     // init swap app
     let appCollection = [
+        ImageProcessingApp,
+        TorusApp,
         ZebraApp,
         CubesPhongApp,
         // MarchingCubeApp,
