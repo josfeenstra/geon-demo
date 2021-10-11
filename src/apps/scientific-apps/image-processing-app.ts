@@ -1,6 +1,6 @@
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, loadImageFromSrc, GeonImage, ImageMesh, TransformLineShader, LineShader, ImageProcessing, HelpGl } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, loadImageFromSrc, GeonImage, ImageMesh, TransformLineShader, LineShader, ImageProcessing, HelpGl, Kernels } from "Geon";
 
-const PATH_TO_TEXTURE = "./data/textures/prague.png";
+const PATH_TO_TEXTURE = "./data/eyes/eyes-3.jpeg";
 
 export class ImageProcessingApp extends App {
     // ui
@@ -32,7 +32,7 @@ export class ImageProcessingApp extends App {
         let imgData = await loadImageFromSrc(PATH_TO_TEXTURE);
         let texture = GeonImage.fromImageData(imgData);
 
-        canny(texture, this.dr);
+        cannyPartially(texture, this.dr);
 
         this.dr.addUi(this.gui);
     }
@@ -51,34 +51,40 @@ export class ImageProcessingApp extends App {
     }
 }
 
-function canny(original: GeonImage, dr?: DebugRenderer) {
+function cannyPartially(original: GeonImage, dr?: DebugRenderer) {
 
-    // for debugging
+    // adding to debug Rendering
     let offset = 0;
-    let printToCanvas = (img: GeonImage, label: string) => {
+    let addToDR = (img: GeonImage, label: string) => {
         console.log("rendering:", label, img.width, img.height)
         let plane = Plane.WorldYZ().moveTo(Vector3.new(-offset, 0, 0));
         dr?.set(ImageMesh.new(img, plane, 1, false, true), label);
         offset += 10;
     }
      
-    printToCanvas(original, "original");
+    addToDR(original, "original");
     
     let grey = original.toGreyscale();
-    printToCanvas(grey, "grey");
+    addToDR(grey, "grey");
 
-    let blurred = ImageProcessing.gaussianBlur5(grey);
-    printToCanvas(blurred, "blurred");
+    let blurred = grey.applyKernel(Kernels.generateGaussianKernel(1.4, 7));
+    addToDR(blurred, "blurred");
 
-    let [gradient, direction] = ImageProcessing.sobel(blurred);
-    printToCanvas(gradient, "sobel gradient");
-    printToCanvas(direction, "sobel direction");
+    let [magnitude, direction] = ImageProcessing.sobelMD(blurred);
+    addToDR(magnitude, "sobel magnitude");
+    addToDR(direction, "sobel direction");
 
-    let theta = ImageProcessing.thetaMap(direction);
-    let thetaClamped = ImageProcessing.clampDirections(theta, 8);
-    printToCanvas(theta.forEachGreyscalePixel(v => v * 1), "clamped directions");
+    let thetaDirections = ImageProcessing.thetaMap(direction);
+    // addToDR(theta, "directions");
+    let thetaClamped = ImageProcessing.clampGreyscale(thetaDirections, 4);
+    // addToDR(thetaClamped.forEachGreyscalePixel(v => v * 64), "clamped directions");
 
-    let thinned = ImageProcessing.thinSobelEdges(gradient, thetaClamped);
-    printToCanvas(thinned, "thinned");
+    let supressed = ImageProcessing.cannyNonMaximumSuppression(magnitude, thetaDirections);
+    addToDR(supressed, "supressed");
+    return supressed;
 
+    // let thresholded = ImageProcessing.cannyThreshold(supressed, 50, 255, 128, 255);
+    // addToDR(thresholded, "thressed");
+
+    
 }

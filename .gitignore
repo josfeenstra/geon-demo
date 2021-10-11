@@ -1,11 +1,15 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+
+/**/eyes
+
 # compiled output
 /dist
 /tmp
 /out-tsc
 /data
 index.js
+
 
 # Runtime data
 pids
