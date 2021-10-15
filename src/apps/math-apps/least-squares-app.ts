@@ -149,7 +149,7 @@ export class LeastSquaresApp extends App {
         let rng = Random.fromSeed(123494854);
         let noise = this.params[9].get();
         this.Pnormal = this.Pnormal.map((v, i) => {
-            v.add(Vector3.fromRandomUnit(rng).scale(noise));
+            return v.add(Vector3.fromRandomUnit(rng).scale(noise));
         });
 
         // approximate using least squares adjustment

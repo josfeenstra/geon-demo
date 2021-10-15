@@ -26,7 +26,7 @@ import { PhongApp } from "./apps/render-apps/phong-app";
 import { CubesPhongApp } from "./apps/render-apps/cubes-phong-app";
 import { ZebraApp } from "./apps/render-apps/zebra-app";
 import { TorusApp } from "./apps/geometry-apps/torus-app";
-import { CannyApp } from "./apps/scientific-apps/image-processing-app";
+import { CannyApp } from "./apps/scientific-apps/canny-app";
 
 
 function main() {

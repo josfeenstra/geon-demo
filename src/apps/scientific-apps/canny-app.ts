@@ -1,9 +1,9 @@
 import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, loadImageFromSrc, GeonImage, ImageMesh, TransformLineShader, LineShader, ImageProcessing, HelpGl, Kernels, EnumParameter, Vector2, COLOR } from "Geon";
 
 const PATHS_TO_TEXTURE = ["./data/eyes/eyes-1.jpeg", "./data/eyes/eyes-2.jpeg","./data/eyes/eyes-3.jpeg"];
-const PATH_TO_TEXTURE =  "./data/textures/earth.png";
+// const PATH_TO_TEXTURE =  "./data/textures/earth.png";
 // PATHS_TO_TEXTURE[0]
-
+const PATH_TO_TEXTURE = "./data/textures/earth.png";
 
 class Settings {
 
@@ -73,7 +73,13 @@ export class CannyApp extends App {
         let texture = GeonImage.fromImageData(imgData);
 
         // this.dr.clear();
-        cannyPartially(texture, this.settings, this.dr);        
+        let settings = this.settings;
+
+        this.dr.set(ImageMesh.new(texture, Plane.WorldYZ().moveTo(Vector3.new(0, 0, 0)), 1, false, true), "original");
+        let grey = ImageProcessing.trueGreyscale(texture);
+        
+        this.dr.set(ImageMesh.new(grey, Plane.WorldYZ().moveTo(Vector3.new(0, 0, 0)), 1, false, true), "grey");
+         // ImageProcessing.canny(texture, settings.get("blur-sigma"), settings.get("blur-size"), settings.get("lower"), settings.get("upper"), this.dr);        
         
         if (this.guiPublished) return;
         this.gui.setContext("image-toggles-wrapper");
@@ -108,59 +114,4 @@ export class CannyApp extends App {
     draw(gl: WebGLRenderingContext) {
         this.dr.render(this.scene);
     }
-}
-
-function cannyPartially(original: GeonImage, settings: Settings, dr?: DebugRenderer) {
-
-    // adding to debug Rendering
-    let offset = 0;
-    let addToDR = (img: GeonImage, label: string) => {
-        // console.log("rendering:", label, img.width, img.height)
-        let plane = Plane.WorldYZ().moveTo(Vector3.new(-offset, 0, 0));
-        dr?.set(ImageMesh.new(img, plane, 1, false, true), label);
-        offset += 10;
-    }
-     
-    addToDR(original, "original");
-    
-    let grey = original.toGreyscale();
-    addToDR(grey, "grey");
-
-    let gauss = Kernels.generateGaussianKernel(settings.get("blur-sigma"), settings.get("blur-size"));
-    let blurred = grey.applyKernel(gauss);
-    addToDR(blurred, "blurred");
-
-    let [magnitude, direction] = ImageProcessing.sobelMD(blurred);
-    addToDR(magnitude, "sobel magnitude");
-    addToDR(direction, "sobel direction");
-
-    let thetaDirections = ImageProcessing.thetaMap(direction);
-
-    let supressed = ImageProcessing.cannyNonMaximumSuppression(magnitude, thetaDirections);
-    addToDR(supressed, "supressed");
-
-    let weak = 128;
-    let strong = 255;
-    let thressed = ImageProcessing.cannyThreshold(supressed, settings.get("lower"), settings.get("upper"), weak, strong);
-    addToDR(thressed, "threshold");
-
-    let hysted = ImageProcessing.cannyHysteresis(thressed, weak, strong);
-    addToDR(hysted, "hysteresis");
-
-
-    console.log("DONE");
-    return hysted;
-
-    // console.time("filled");
-    // filled.bucketFill(Vector2.new(1,1), COLOR.blue, true);
-    // filled.bucketFill(Vector2.new(128,128), COLOR.blue, true);
-    // console.timeEnd("filled");
-    // addToDR(filled, "filled");
-
-    return supressed;
-
-    // let thresholded = ImageProcessing.cannyThreshold(supressed, 50, 255, 128, 255);
-    // addToDR(thresholded, "thressed");
-
-    
 }
