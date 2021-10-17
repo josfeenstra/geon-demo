@@ -4,21 +4,19 @@ import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
 import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, Entity } from "Geon";
 
-export class TorusApp extends App {
+export class DrawTargetApp extends App {
     // ui
     params: Parameter[] = [];
 
     // state
-    points!: MultiVector3;
-    Plsa!: MultiVector3;
-    Pnormal!: MultiVector3;
+    entity: Entity;
+    scene: Scene;
 
     // render
     dr: DebugRenderer;
     ps: PhongShader;
     gs: LineShader;
-    entity: Entity;
-    scene: Scene;
+
 
     constructor(gl: WebGLRenderingContext) {
         super(gl);
@@ -28,7 +26,7 @@ export class TorusApp extends App {
         this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
         this.dr = DebugRenderer.new(gl);
         this.ps = PhongShader.new(gl);
-        this.entity = Entity.new(undefined, Model.new(undefined, Material.newPurple()));
+        this.entity = Entity.new();
 
         let camera = new Camera(canvas, -2, true);
         camera.set(-50, 1, 1);

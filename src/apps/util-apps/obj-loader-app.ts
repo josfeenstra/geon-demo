@@ -6,7 +6,7 @@ import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { TextureMeshShader } from "Engine/render/shaders-old/texture-mesh-shader";
-import { App, Camera, ShaderMesh, MultiLine, addDropFileEventListeners, InputState, Scene, MultiVector3, Vector3, loadTextFromFile, meshFromObj, Domain3, DrawSpeed, DebugRenderer, loadImageFromFile, GeonImage } from "Geon";
+import { App, Camera, ShaderMesh, MultiLine, addDropFileEventListeners, InputState, Scene, MultiVector3, Vector3, loadTextFromFile, meshFromObj, Domain3, DrawSpeed, DebugRenderer, loadImageFromFile, Texture } from "Geon";
 
 export class ObjLoaderApp extends App {
     
@@ -90,7 +90,7 @@ async function processFiles(this: ObjLoaderApp, files: FileList) {
     if (textureFile) {
         console.log("flipping texture")
         let texture = await loadImageFromFile(textureFile);
-        texture = GeonImage.fromImageData(texture).flipVer().toImageData();
+        texture = Texture.fromImageData(texture).flipVer().toImageData();
         model.setTexture(texture);
         console.log("done flipping")
         this.tr.set(model, DrawSpeed.StaticDraw);

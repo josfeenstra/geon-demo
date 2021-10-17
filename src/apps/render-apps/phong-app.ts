@@ -11,7 +11,7 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { AmbientMeshShader } from "Engine/render/shaders/AmbientMeshShader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
-import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Domain3 } from "Geon";
+import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Domain3, Entity } from "Geon";
 
 
 export class PhongApp extends App {
@@ -141,9 +141,10 @@ export class PhongApp extends App {
         this.calcAmbientOcclusion(mesh, this.plane);
 
         // let model = new Model(Matrix4.newIdentity(), rend.mesh, this.material);
-        let model2 = new Model(Matrix4.newTranslate(this.somePos), mesh, this.material);
+        let model = Model.new(mesh, this.material);
+        let e = Entity.new(Matrix4.newTranslate(this.somePos), model);
         // this.phong.load(model, DrawSpeed.StaticDraw);
-        this.phong.load(model2, DrawSpeed.StaticDraw);
+        this.phong.load(e, DrawSpeed.StaticDraw);
         this.lineRenderer.set(grid);
     }
 

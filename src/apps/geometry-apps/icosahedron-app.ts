@@ -4,27 +4,27 @@
 
 import { NormalShader } from "Engine/render/shaders-old/mesh-normals-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene } from "Geon";
+import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene, PhongShader, Entity, Model } from "Geon";
 
 
 export class IcosahedronApp extends App {
     camera: Camera;
-    meshRend: ShadedMeshShader;
+    meshRend: PhongShader;
     normalRend: NormalShader;
 
     rotate!: Parameter;
     inner!: Parameter;
     radius = 0.1; // radius!: Parameter;
-    detail = 6; // detail!: Parameter;
+    detail = 10; // detail!: Parameter;
 
     graph!: Graph;
-    mesh!: ShaderMesh;
+    isocahedron!: Entity;
 
     constructor(gl: WebGLRenderingContext) {
         super(gl);
         let canvas = gl.canvas as HTMLCanvasElement;
         this.camera = new Camera(canvas, 8, true);
-        this.meshRend = new ShadedMeshShader(gl);
+        this.meshRend = new PhongShader(gl);
         this.normalRend = new NormalShader(gl);
     }
 
@@ -107,8 +107,10 @@ export class IcosahedronApp extends App {
 
     start() {
         this.graph = this.getIcosahedron();
-        this.mesh = graphToMultiMesh(this.graph, this.radius, this.detail, this.inner.get() == 1);
-        this.meshRend.set(this.mesh);
+        let mesh = graphToMultiMesh(this.graph, this.radius, this.detail, this.inner.get() == 1);
+        let e = Entity.new(undefined, Model.new(mesh, undefined)); 
+        this.meshRend.load(e);
+        this.isocahedron = e;
         // this.normalRend.set(this.graph.toRenderable(), DrawSpeed.DynamicDraw);
 
         // console.log("all loops: ", this.graph.allLoops());
@@ -120,15 +122,15 @@ export class IcosahedronApp extends App {
         if (!state.mouseRightDown && this.rotate.get() == 1) {
             let alpha = 0.0002 * state.tick;
             let rot = Matrix4.newXRotation(alpha).multiply(Matrix4.newYRotation(alpha));
-            this.mesh!.transform(rot);
+            this.isocahedron!.position.multiply(rot);
 
-            this.meshRend.set(this.mesh, DrawSpeed.DynamicDraw);
+            this.meshRend.loadPosition(this.isocahedron.position);
         }
     }
 
     draw(gl: WebGLRenderingContext) {
-        let c = new Scene(this.camera);
-        this.meshRend.render(c);
+        let scene = new Scene(this.camera);
+        this.meshRend.draw(scene);
         // this.normalRend.render(gl, this.camera);
     }
 }
@@ -139,7 +141,7 @@ export function graphToMultiMesh(
     detail: number,
     inner: boolean,
     balls = true,
-): ShaderMesh {
+): Mesh {
     let meshes: Mesh[] = [];
 
     if (balls) {
@@ -160,7 +162,9 @@ export function graphToMultiMesh(
         meshes.push(Mesh.fromGraph(graph));
     }
 
-    let rmesh = Mesh.fromJoin(meshes).ToShaderMesh();
-    rmesh.calculateFaceNormals();
+    let rmesh = Mesh.fromJoin(meshes);
+ 
+    rmesh.ensureUVs();
+    rmesh.calcAndSetVertexNormals();
     return rmesh;
 }

@@ -1,5 +1,5 @@
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, ImageRenderer, BillboardShader, loadImageFromSrc, GeonImage, Domain2, Vector2, MultiVector2, BillboardPayload, DrawSpeed, UI, MultiLine, Plane, Vector3, InputState, Scene } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, ImageRenderer, BillboardShader, loadImageFromSrc, Texture, Domain2, Vector2, MultiVector2, BillboardPayload, DrawSpeed, UI, MultiLine, Plane, Vector3, InputState, Scene } from "Geon";
 
 export class BillboardApp extends App {
     // ui
@@ -32,7 +32,7 @@ export class BillboardApp extends App {
         this.startGrid();
 
         let imgData = await loadImageFromSrc("./data/textures/minecraft.png");
-        let texture = GeonImage.fromImageData(imgData);
+        let texture = Texture.fromImageData(imgData);
         // img = img.trim(16,16,32,32);
         this.ir.add(texture);
         this.ir.buffer();

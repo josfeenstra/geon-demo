@@ -10,7 +10,7 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
 import { DepthMeshShader } from "Engine/render/shaders/DepthMeshShader"
-import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3, DebugRenderer, DrawSpeed } from "Geon";
+import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3, DebugRenderer, DrawSpeed, Entity } from "Geon";
 
 export class CubesPhongApp extends App {
     // renderinfo
@@ -286,16 +286,14 @@ export class CubesPhongApp extends App {
             }
         });
 
-        let m = Mesh.fromJoin(mapGeo);
-        m = m.toLinearMesh();
-        m.ensureMultiFaceNormals();
-        m.ensureUVs();
-        let model = Model.default();
-        model.material = Material.newPurple();
-        model.material.specularDampner = 2
-        model.mesh = m;
-        this.phongShader.load(model, DrawSpeed.StaticDraw);
-        // this.ds.load(model.mesh, DrawSpeed.StaticDraw);
+        let mesh = Mesh.fromJoin(mapGeo);
+        mesh = mesh.toLinearMesh();
+        mesh.ensureMultiFaceNormals();
+        mesh.ensureUVs();
+        let e = Entity.new(undefined, Model.new(mesh, Material.newPurple()))
+        e.model.material.specularDampner = 2
+        e.model.mesh = mesh;
+        this.phongShader.load(e, DrawSpeed.StaticDraw);
     }
 
     worldToMap(coord: Vector3): Vector3 {

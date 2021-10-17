@@ -3,7 +3,7 @@
 // author : Jos Feenstra
 // purpose : test with Renderers, Domains & Vectors
 
-import { App, ImageRenderer, Camera, UI, GeonImage, InputState, Scene } from "Geon";
+import { App, ImageRenderer, Camera, UI, Texture, InputState, Scene } from "Geon";
 
 export class UITestApp extends App {
     context: Scene;
@@ -24,7 +24,7 @@ export class UITestApp extends App {
     }
 
     start() {
-        let img = new GeonImage(10, 10, 4);
+        let img = new Texture(10, 10, 4);
         img.fill([255, 255, 255, 255]);
         this.images.add(img);
         this.images.buffer();

@@ -11,7 +11,7 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { AmbientMeshShader } from "Engine/render/shaders/AmbientMeshShader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
-import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4 } from "Geon";
+import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Entity } from "Geon";
 
 
 export class MeshInspectorApp extends App {
@@ -126,7 +126,7 @@ export class MeshInspectorApp extends App {
                 this.ams.load(rend.mesh, DrawSpeed.StaticDraw);
                 break;
             case 4:
-                let model = new Model(Matrix4.newIdentity(), rend.mesh, Material.default());
+                let model = Entity.new(Matrix4.newIdentity(), Model.new(rend.mesh, Material.default()));
                 break;
             default:
                 break;

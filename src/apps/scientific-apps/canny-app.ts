@@ -1,4 +1,4 @@
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, loadImageFromSrc, GeonImage, ImageMesh, TransformLineShader, LineShader, ImageProcessing, HelpGl, Kernels, EnumParameter, Vector2, COLOR } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, loadImageFromSrc, Texture, ImageMesh, TransformLineShader, LineShader, ImageProcessing, HelpGl, Kernels, EnumParameter, Vector2, COLOR } from "Geon";
 
 const PATHS_TO_TEXTURE = ["./data/eyes/eyes-1.jpeg", "./data/eyes/eyes-2.jpeg","./data/eyes/eyes-3.jpeg"];
 // const PATH_TO_TEXTURE =  "./data/textures/earth.png";
@@ -70,16 +70,16 @@ export class CannyApp extends App {
 
     async start() {
         let imgData = await loadImageFromSrc(PATH_TO_TEXTURE);
-        let texture = GeonImage.fromImageData(imgData);
+        let texture = Texture.fromImageData(imgData);
 
         // this.dr.clear();
         let settings = this.settings;
 
-        this.dr.set(ImageMesh.new(texture, Plane.WorldYZ().moveTo(Vector3.new(0, 0, 0)), 1, false, true), "original");
-        let grey = ImageProcessing.trueGreyscale(texture);
+        // this.dr.set(ImageMesh.new(texture, Plane.WorldYZ().moveTo(Vector3.new(0, 0, 0)), 1, false, true), "original");
+        // let grey = ImageProcessing.trueGreyscale(texture);
         
-        this.dr.set(ImageMesh.new(grey, Plane.WorldYZ().moveTo(Vector3.new(0, 0, 0)), 1, false, true), "grey");
-         // ImageProcessing.canny(texture, settings.get("blur-sigma"), settings.get("blur-size"), settings.get("lower"), settings.get("upper"), this.dr);        
+        // this.dr.set(ImageMesh.new(grey, Plane.WorldYZ().moveTo(Vector3.new(0, 0, 0)), 1, false, true), "grey");
+        ImageProcessing.canny(texture, settings.get("blur-sigma"), settings.get("blur-size"), settings.get("lower"), settings.get("upper"), this.dr);        
         
         if (this.guiPublished) return;
         this.gui.setContext("image-toggles-wrapper");

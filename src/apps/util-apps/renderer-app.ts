@@ -2,7 +2,7 @@
 
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { TextureMeshShader } from "Engine/render/shaders-old/texture-mesh-shader";
-import { App, Parameter, UI, MultiVector3, Random, Camera, DebugRenderer, Domain3, Vector3, GeonImage, ImageMesh, Polyline, Plane, MultiLine, DrawSpeed, InputState, Scene } from "Geon";
+import { App, Parameter, UI, MultiVector3, Random, Camera, DebugRenderer, Domain3, Vector3, Texture, ImageMesh, Polyline, Plane, MultiLine, DrawSpeed, InputState, Scene } from "Geon";
 
 export class MultiRendererApp extends App {
     
@@ -47,7 +47,7 @@ export class MultiRendererApp extends App {
         // three images
         let w = 8;
         let h = 8;
-        let img = GeonImage.new(w, h);
+        let img = Texture.new(w, h);
         
         img.forEach((x, y) => {return [Math.random() * 255, y, 255, 1];});
         this.mr.set(ImageMesh.new(img, Plane.WorldYZ().moveTo(Vector3.new(4,0,0))), "image1");
@@ -55,7 +55,7 @@ export class MultiRendererApp extends App {
         this.mr.set(ImageMesh.new(img, Plane.WorldYZ().moveTo(Vector3.new(-4,0,0)), 1), "image2");
         
         img.forEach((x, y) => {return [255, 255, Math.random() * 255, 1];});
-        this.mr.set(ImageMesh.new(img, Plane.WorldXZ().moveTo(Vector3.new(0,-4,0)), 1), "image3");
+        this.mr.set(ImageMesh.new(img, Plane.WorldXZ().moveTo(Vector3.new(0,4,0)), 1), "image3");
         img.forEach((x, y) => {return [Math.random() * 255, y, 255, 1];});
         this.mr.set(ImageMesh.new(img, Plane.WorldXZ().moveTo(Vector3.new(0,-4,0)), 1), "image4");
         

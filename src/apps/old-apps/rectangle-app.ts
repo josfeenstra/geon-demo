@@ -2,7 +2,7 @@
 // purpose : test with Renderers, Domains & Vectors
 
 // import { Rectangle2 } from "../geo/rectangle";
-// import { GeonImage } from "../img/Image";
+// import { Texture } from "../img/Image";
 // import { Domain, Domain2, Domain3 } from "../math/domain";
 // import { Matrix3 } from "../math/matrix";
 // import { Vector3 } from "../math/vector";
@@ -17,14 +17,14 @@
 
 //     bounds: Domain3;
 //     renderer: ImageRenderer;
-//     tex: GeonImage;
+//     tex: Texture;
 
 //     // unique constructors
 //     constructor(gl: WebGLRenderingContext) {
 //         super(gl);
 //         this.bounds = Domain3.fromBounds(0, 300, 0, 300, 0, 500);
 //         this.renderer = new ImageRenderer(gl)
-//         this.tex = new GeonImage(20, 20).fillEvery(randomPixelColor);
+//         this.tex = new Texture(20, 20).fillEvery(randomPixelColor);
 //     }
 
 //     start() {
