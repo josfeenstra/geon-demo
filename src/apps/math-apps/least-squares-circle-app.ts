@@ -19,6 +19,7 @@ export class LeastSquaresCircleApp extends App {
     scene: Scene;
     omni: DebugRenderer;
     ds: DotShader;
+    dsYellow: DotShader;
 
     constructor(gl: WebGLRenderingContext) {
         super(gl);
@@ -30,6 +31,7 @@ export class LeastSquaresCircleApp extends App {
         this.scene = new Scene(camera);
         this.omni = DebugRenderer.new(gl);
         this.ds = new DotShader(gl)
+        this.dsYellow = new DotShader(gl, 10, [0,1,1,1], false);
     }
 
     ui(ui: UI) {
@@ -75,59 +77,102 @@ export class LeastSquaresCircleApp extends App {
     draw(gl: WebGLRenderingContext) {
         this.omni.render(this.scene);
         this.ds.render(this.scene);
+        this.dsYellow.render(this.scene);
     }
 
     lsa() {
-        this.ds.set(this.points, DrawSpeed.DynamicDraw);
+        this.ds.set(this.points, DrawSpeed.StaticDraw);
         if (this.points.length < 5) {
             return;
         }
 
         // get MultiVector2
-        let points2d = MultiVector2.new(this.points.length);
-        for (let i = 0; i < this.points.length; i++) {
-            points2d.set(i, this.points[i].toVector2());
-        }
 
-        // debug
-        // let A = FloatMatrix.fromNative([[2, -1, 0],[4,3,-2], [1,3,4], [6,-1,4]]);
-        let A = points2d.matrix;
-
-        //
-
-        // 
-        // let inv = A.inv();
-        // inv.print();
-
-        // inv.mul(A).print();
-        // let inv2 = matrix.inv2();
-        
-        
-        
-        // matrix.print();
-        // A.intb().mul(inv.mul(matrix)).print();
-
-        // inv.mul(matrix).print();
-        // inv2.mul(matrix).print();
-
-        // let vec = FloatMatrix.fromNative([[1,0],[0,1]]);
-        // vec.print();
-        // matrix.mul(vec).print();
-        
-
-        // let pinv = matrix.inv();
-        // console.log(pinv);
-        // pinv.print();
-
-        // let result = matrix.mul(pinv);
-        // result.print();
+        let points2d = this.points.map((p) => p.toVector2());
 
 
         // get a lsa circle
-        let circle = Circle2.fromLSA(points2d);
-
+        let results = progLSACircle(points2d, 4);
+        if (!results) {
+            return;
+        }
+        let {circle, included, excluded} = results;
         // fill the shaders with this new data
         
         this.omni.set(MultiLine.fromCircle(Circle3.fromCircle2(circle)), "circle", [1,0,1,1]);
+        // this.dsYellow.set(included, DrawSpeed.StaticDraw)
+        // this.ds.set(included, DrawSpeed.StaticDraw);
     }
+
+
+
+
+}
+
+
+function progLSACircle(included: Vector2[], maxDeviation: number, maxIterations=1000) : {circle: Circle2, included: Vector2[], excluded: Vector2[]} | undefined {
+    
+    let getIdWithLargestError = (circle: Circle2, points2d: MultiVector2) => {
+        
+        let highscore = 0;
+        let highscoreId = -1;
+        for (let i = 0 ; i < points2d.count; i++) {
+            let p = points2d.get(i);
+            let score = Math.abs(circle.distanceSquared(p));
+            if (score > highscore) {
+                highscore = score;
+                highscoreId = i;
+            }
+        }
+        return [highscore, highscoreId];
+    }
+
+    let excluded: Vector2[] = [];
+    let points2d = MultiVector2.fromList(included);
+
+    for (let i = 0; i < maxIterations; i++) {
+        
+        // console.log(included);
+        let stop = true;
+
+        // get a circle using all `points`
+        
+        let circle = Circle2.fromLSA(points2d);
+        // empty `points, and fill it with only the points kept in range`
+        let [largestError, largestID] = getIdWithLargestError(circle, points2d);
+        if (largestError > maxDeviation) {
+            excluded.push(points2d.get(largestID));
+            points2d = points2d.remove([largestID]);
+            stop = false;
+            continue;
+        }
+
+        // if we arrive here, all errors are smaller than the max-deviation. We are done!
+        return {circle, included, excluded};
+        
+    }
+    console.error("MAX CIRCLE ITERATIONS REACHED!");
+    return undefined;
+}
+
+function test() {
+
+    // matrix.print();
+    // A.intb().mul(inv.mul(matrix)).print();
+
+    // inv.mul(matrix).print();
+    // inv2.mul(matrix).print();
+
+    // let vec = FloatMatrix.fromNative([[1,0],[0,1]]);
+    // vec.print();
+    // matrix.mul(vec).print();
+    
+
+    // let pinv = matrix.inv();
+    // console.log(pinv);
+    // pinv.print();
+
+    // let result = matrix.mul(pinv);
+    // result.print();
+
 }
