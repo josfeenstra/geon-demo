@@ -1,5 +1,5 @@
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, ImageRenderer, BillboardShader, loadImageFromSrc, Texture, Domain2, Vector2, MultiVector2, BillboardPayload, DrawSpeed, UI, MultiLine, Plane, Vector3, InputState, Scene } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, ImageRenderer, BillboardShader, loadImageFromSrc, Bitmap as Texture, Domain2, Vector2, MultiVector2, BillboardPayload, DrawSpeed, UI, MultiLine, Plane, Vector3, InputState, Scene } from "Geon";
 
 export class BillboardApp extends App {
     // ui

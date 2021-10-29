@@ -27,6 +27,8 @@ import { CubesPhongApp } from "./apps/render-apps/cubes-phong-app";
 import { ZebraApp } from "./apps/render-apps/zebra-app";
 import { TorusApp } from "./apps/geometry-apps/torus-app";
 import { CannyApp } from "./apps/scientific-apps/canny-app";
+import { DrawTargetApp } from "./apps/render-apps/draw-target-app";
+import { LeastSquaresCircleApp } from "./apps/math-apps/least-squares-circle-app";
 
 
 function main() {
@@ -43,6 +45,8 @@ function main() {
 
     // init swap app
     let appCollection = [
+        LeastSquaresCircleApp,
+        DrawTargetApp,
         CannyApp,
         TorusApp,
         ZebraApp,

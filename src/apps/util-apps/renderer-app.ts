@@ -2,7 +2,7 @@
 
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { TextureMeshShader } from "Engine/render/shaders-old/texture-mesh-shader";
-import { App, Parameter, UI, MultiVector3, Random, Camera, DebugRenderer, Domain3, Vector3, Texture, ImageMesh, Polyline, Plane, MultiLine, DrawSpeed, InputState, Scene } from "Geon";
+import { App, Parameter, UI, MultiVector3, Random, Camera, DebugRenderer, Domain3, Vector3, Bitmap as Texture, ImageMesh, Polyline, Plane, MultiLine, DrawSpeed, InputState, Scene } from "Geon";
 
 export class MultiRendererApp extends App {
     

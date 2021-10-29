@@ -2,7 +2,7 @@ import { Material } from "Engine/render/basics/Material";
 import { Model } from "Engine/render/basics/Model";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, Entity } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, Entity, DrawTarget, TextureMeshShader, TexturedMeshShader, ShaderMesh, Rectangle3 } from "Geon";
 
 export class DrawTargetApp extends App {
     // ui
@@ -13,10 +13,10 @@ export class DrawTargetApp extends App {
     scene: Scene;
 
     // render
-    dr: DebugRenderer;
+    ts: TexturedMeshShader;
     ps: PhongShader;
     gs: LineShader;
-
+    drawTarget: DrawTarget;
 
     constructor(gl: WebGLRenderingContext) {
         super(gl);
@@ -24,9 +24,12 @@ export class DrawTargetApp extends App {
         let canvas = gl.canvas as HTMLCanvasElement;
 
         this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
-        this.dr = DebugRenderer.new(gl);
+        this.ts = new TexturedMeshShader(gl);
         this.ps = PhongShader.new(gl);
         this.entity = Entity.new();
+
+        this.drawTarget = DrawTarget.createAndBind(gl, canvas.width, canvas.height);
+        // this.drawTarget.unbind(gl);
 
         let camera = new Camera(canvas, -2, true);
         camera.set(-50, 1, 1);
@@ -35,13 +38,9 @@ export class DrawTargetApp extends App {
 
     start() {
         this.startGrid();
-        let mesh = Mesh.newTorus(5, 1, 30, 20);
-
-        mesh.ensureUVs();
-
-        this.entity.model.mesh = mesh;
+        this.entity.model.mesh.calcAndSetFaceNormals();
+        this.entity.model.mesh.ensureUVs();
         this.ps.load(this.entity, DrawSpeed.StaticDraw);
-        // create something!
     }
 
     ui(ui: UI) {
@@ -51,6 +50,7 @@ export class DrawTargetApp extends App {
     startGrid() {
         let grid = MultiLine.fromGrid(Plane.WorldXY().moveTo(new Vector3(0, 0, -1)), 100, 2);
         this.gs.set(grid, DrawSpeed.StaticDraw);
+        this.ts.load(Mesh.fromRectDoubleSided(Rectangle3.new(Plane.WorldYZ().moveTo(Vector3.new(3,0,3)), Domain2.fromRadius(4))))
     }
 
     update(state: InputState) {
@@ -64,8 +64,22 @@ export class DrawTargetApp extends App {
 
     draw(gl: WebGLRenderingContext) {
         
+        // unload to prevent a cyclical pattern
+        this.ts.loadTexture(this.drawTarget.width, this.drawTarget.height, null);
+
+        // set a texture
+        this.drawTarget.bind(gl);
+
         this.gs.render(this.scene);
-        this.dr.render(this.scene);
+        this.ts.draw(this.scene);
+        this.ps.draw(this.scene);
+
+        this.drawTarget.unbind(gl);
+
+        this.ts.loadTexture(this.drawTarget.width, this.drawTarget.height, this.drawTarget.texture);
+
+        this.gs.render(this.scene);
+        this.ts.draw(this.scene);
         this.ps.draw(this.scene);
     }
 }

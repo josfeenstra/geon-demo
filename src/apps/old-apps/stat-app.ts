@@ -41,7 +41,7 @@ export class StatApp extends App {
             [2, -6, 6, 5, 1],
             [4, 5, 0, -2, 2],
         ]);
-
+        
         let data = Stat.svd(a);
         console.log(data);
         console.log(Math.sqrt(1248), 20, Math.sqrt(384), 0, 0);

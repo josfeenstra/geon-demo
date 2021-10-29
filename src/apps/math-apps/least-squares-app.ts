@@ -240,7 +240,7 @@ function leastSquares(left: MultiVector3, right: MultiVector3): Matrix4 {
 
     let height = right_width * n;
     let width = 16;
-    let M = new FloatMatrix(height, width);
+    let M = new FloatMatrix(width, height);
 
     // per row in floatmatrix
     for (let f = 0; f < n; f++) {
@@ -293,7 +293,7 @@ function leastSquaresTranslation(left: MultiVector3, right: MultiVector3): Matri
 
     let height = right_width * n;
     let width = 16;
-    let M = new FloatMatrix(height, width);
+    let M = new FloatMatrix(width, height);
 
     // per row in floatmatrix
     for (let f = 0; f < n; f++) {
