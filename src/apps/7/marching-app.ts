@@ -10,7 +10,10 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
 import { DepthMeshShader } from "Engine/render/shaders/DepthMeshShader"
-import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3, DebugRenderer, DrawSpeed, Entity, Perlin } from "Geon";
+import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, 
+    IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, 
+    Domain3, DebugRenderer, DrawSpeed, Entity, Perlin, MultiShader, 
+    marchingCubes, MultiVector3, IntMatrix, getLongDefaultIndices } from "Geon";
 
 export class MarchingCubeApp extends App {
     // renderinfo
@@ -31,10 +34,10 @@ export class MarchingCubeApp extends App {
     cursorVisual?: MultiLine;
 
     // logic data
-    size = 20;
+    size = 5;
     cellSize = 1;
 
-    terrain!: Terrain;
+    terrain!: VoxelTerrain;
     terrainEntity: Entity;
 
     constructor(gl: WebGLRenderingContext) {
@@ -47,13 +50,14 @@ export class MarchingCubeApp extends App {
         this.ds = new DepthMeshShader(gl);
         this.dotsShader = new DotShader(gl);
 
-        let e = Entity.new(undefined, Model.new(undefined, Material.newPurple()))
+        let e = Entity.new(undefined, Model.new(undefined, Material.grey()))
         e.model.material.specularDampner = 2
         this.terrainEntity = e;
     }
 
     start() {
-        this.terrain = Terrain.fromPerlin(this.size, this.cellSize);
+        this.terrain = VoxelTerrain.fromPerlin(this.size, this.cellSize, 0.50);
+        
         this.onTerrainChange();
     }
 
@@ -73,7 +77,12 @@ export class MarchingCubeApp extends App {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     onTerrainChange() {
+        let mcMesh = this.terrain.bufferToMarchingCubes();
+
+        this.terrainEntity.model.mesh = mcMesh;
+        // this.phongShader.load(this.terrainEntity, DrawSpeed.StaticDraw);
         this.dotsShader.set(this.terrain.bufferToPoints());
+        this.dr.set(mcMesh, "mc");
     }
 
     addPreviewCube(point: Vector3) {
@@ -104,13 +113,13 @@ export class MarchingCubeApp extends App {
 
         // figure out which cube we are pointing to
         this.flushPreviewCubes();
-        let [cubeID, cubeIDprevious] = this.terrain.voxelRaycast(mouseRay, 40);
+        let [cubeID, cubeIDprevious] = this.terrain.raycast(mouseRay, 40);
         if (cubeID == -1) {
             // this.dr.set(Mesh.zero(), "preview-cube");
             return;
         }
 
-        let cubeCursor = this.terrain.intCube.getCoords(cubeIDprevious);
+        let cubeCursor = this.terrain.intCube.getCoord(cubeIDprevious);
         this.addPreviewCube(cubeCursor);
 
         // render cube at this position
@@ -134,7 +143,7 @@ export class MarchingCubeApp extends App {
 /**
  * Represents a 3D interactible terrain, minecraft style.
  */
-class Terrain {
+class VoxelTerrain {
     
     private constructor(
         public intCube: IntCube,
@@ -151,19 +160,16 @@ class Terrain {
         let halfSize = size / 2;
         let halfSizePlus = halfSize + cellSize / 2;
 
-        return new Terrain(intCube, size, cellSize, halfSize, halfSizePlus);
-
-
+        return new VoxelTerrain(intCube, size, cellSize, halfSize, halfSizePlus);
     }
 
-    static fromPerlin(size: number, cellSize: number) {
-        let terrain = Terrain.new(size, cellSize);
+    static fromPerlin(size: number, cellSize: number, scale=0.20, offset=Vector3.zero()) {
+        let terrain = VoxelTerrain.new(size, cellSize);
         let perlin = new Perlin();
-        let scale = 0.20;
         terrain.intCube.map((value, i) => {
     
-            let c = terrain.intCube.getCoords(i);
-            let noise = perlin.noise(c.x * scale, c.y * scale, c.z * scale);
+            let c = terrain.intCube.getCoord(i);
+            let noise = perlin.noise(offset.x + c.x * scale, offset.y + c.y * scale, offset.z + c.z * scale);
     
             if (i < 10) {
                 // console.log(c);
@@ -190,9 +196,9 @@ class Terrain {
 
     bufferToPoints() {
         let centers:Vector3[] = [];
-        this.intCube.iter((entry, index) => {
-            if (entry == 1) {
-                let mapCoord = this.intCube.getCoords(index);
+        this.intCube.iter((value, index) => {
+            if (value == 1) {
+                let mapCoord = this.intCube.getCoord(index);
                 let coord = this.mapToWorld(mapCoord);
                 centers.push(coord);
             }
@@ -202,14 +208,13 @@ class Terrain {
 
     bufferToVoxels() : Mesh {
         let mapGeo: Mesh[] = [];
-        let centers:Vector3[] = [];
         this.intCube.iter((entry, index) => {
             if (entry == 1) {
-                let mapCoord = this.intCube.getCoords(index);
+                let mapCoord = this.intCube.getCoord(index);
                 let coord = this.mapToWorld(mapCoord);
-                centers.push(coord);
-                // let cube = this.createCube(coord);
-                // mapGeo.push(Mesh.fromCube(cube));
+
+                let cube = Cube.fromRadius(coord, this.cellSize / 2);
+                mapGeo.push(Mesh.fromCube(cube));
             }
         });
 
@@ -220,7 +225,44 @@ class Terrain {
         return mesh;
     }
 
-    bufferToMarchingCubes() {
+    bufferToMarchingCubes(level = 0.5) : Mesh {
+
+        // get the marching cubes function
+        let mc = marchingCubes;
+        let vertices: Vector3[] = [];
+
+        this.intCube.iter((value, index) => {
+            let coord = this.intCube.getCoord(index)
+            
+            // stay away from the last ones 
+            if (coord.x > this.intCube._width - 2  ||
+                coord.y > this.intCube._height - 2 ||
+                coord.z > this.intCube._depth - 2) {
+                return;
+            };
+
+            // gather a 2x2x2 cube of values
+            let corners: Vector3[] = [];
+            let values: number[] = [];
+            for (let x of [coord.x + 1, coord.x]) {
+            for (let y of [coord.y, coord.y + 1]) {
+            for (let z of [coord.z + 1, coord.z]) {
+                        corners.push(this.mapToWorld(Vector3.new(x,y,z)));
+                        values.push(this.intCube.tryGet(x,y,z)!);
+                        // console.log("la")
+            }}}    
+            // console.log(corners);
+            vertices.push(...mc(corners, values, level));
+        });
+
+        let intMatrix = IntMatrix.new(vertices.length / 3, 3, getLongDefaultIndices(vertices.length))
+
+        let mesh = Mesh.new(MultiVector3.fromList(vertices), intMatrix);
+        // mesh = mesh.toLinearMesh();
+        // mesh.ensureMultiFaceNormals();
+        // mesh.ensureUVs();
+        return mesh;
+
 
     }
 
@@ -231,7 +273,7 @@ class Terrain {
      * Amanatides, Woo
      * Dept. of Computer Science
      */
-    voxelRaycast(ray: Ray, range: number): [number, number] {
+    raycast(ray: Ray, range: number): [number, number] {
         let startPoint = this.worldToMap(ray.origin);
         let voxelCenter = this.mapToWorld(startPoint);
 
@@ -321,6 +363,5 @@ class Terrain {
         }
         return [-1, -1];
     }
-
 }
 

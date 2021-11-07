@@ -158,7 +158,7 @@ export class GeometryApp extends App {
             return;
         }
 
-        let cubeCursor = this.map.getCoords(cubeIDprevious);
+        let cubeCursor = this.map.getCoord(cubeIDprevious);
         this.addPreviewCube(cubeCursor);
 
         // render cube at this position
@@ -279,7 +279,7 @@ export class GeometryApp extends App {
         let mapGeo: Mesh[] = [];
         this.map.iter((entry, index) => {
             if (entry == 1) {
-                let mapCoord = this.map.getCoords(index);
+                let mapCoord = this.map.getCoord(index);
                 let coord = this.mapToWorld(mapCoord);
                 let cube = this.createCube(coord);
                 mapGeo.push(Mesh.fromCube(cube));
