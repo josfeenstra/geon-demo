@@ -10,11 +10,12 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
 import { DepthMeshShader } from "Engine/render/shaders/DepthMeshShader"
-import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3, DebugRenderer, DrawSpeed, Entity } from "Geon";
+import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3, DebugRenderer, DrawSpeed, Entity, Perlin } from "Geon";
 
 export class MarchingCubeApp extends App {
     // renderinfo
     phongShader!: PhongShader;
+    dotsShader: DotShader;
     dr!: DebugRenderer;
     ds!: DepthMeshShader;
 
@@ -30,11 +31,11 @@ export class MarchingCubeApp extends App {
     cursorVisual?: MultiLine;
 
     // logic data
-    size = 50;
+    size = 20;
     cellSize = 1;
-    map!: IntCube;
 
-    fov = new Parameter("fov", 80, 10, 100, 1);
+    terrain!: Terrain;
+    terrainEntity: Entity;
 
     constructor(gl: WebGLRenderingContext) {
         // setup render env
@@ -44,89 +45,40 @@ export class MarchingCubeApp extends App {
         this.phongShader = new PhongShader(gl);
         this.dr = DebugRenderer.new(gl);
         this.ds = new DepthMeshShader(gl);
+        this.dotsShader = new DotShader(gl);
+
+        let e = Entity.new(undefined, Model.new(undefined, Material.newPurple()))
+        e.model.material.specularDampner = 2
+        this.terrainEntity = e;
     }
 
-    // called after init
     start() {
-        this.map = new IntCube(this.size, this.size, this.size);
-        this.map.fill(0);
-
-        // add random blocks in the world
-        this.map.map((value, index) => {
-            if (Math.random() > 0.99) {
-                return 1;
-            } else {
-                return value;
-            }
-        });
-
-        // let perlin = new Perlin();
-        // this.map.map((value, i) => {
-
-        //     let c = this.map.getCoords(i);
-
-        //     let scale = 0.05;
-        //     let noise = perlin.noise(c.x * scale, c.y * scale, c.z * scale);
-
-        //     if (i < 10) {
-        //         console.log(c);
-        //         console.log(noise);
-        //     }
-
-        //     if (noise > 0.60) {
-        //         return 1;
-        //     } else {
-        //         return value;
-        //     }
-        // })
-
-        // console.log("done setting")
-
-        // after change, buffer
-        this.bufferMap();
-
-        // console.log("done")
-
-        this.gridLarge = MultiLine.fromGrid(this.plane, this.size, this.cellSize);
-        this.gridSmall = MultiLine.fromGrid(this.plane, this.size * 10 - 1, this.cellSize / 10);
-
-        // this.whiteLineRenderer.set(this.gl, this.gridLarge, DrawSpeed.StaticDraw);
-        // this.greyLineRenderer.set(this.gl, this.gridSmall, DrawSpeed.StaticDraw);
-    }
-
-    ui(ui: UI) {
-        ui.addParameter(this.fov, (v) => {
-            this.scene.camera.fov = v;
-        });
+        this.terrain = Terrain.fromPerlin(this.size, this.cellSize);
+        this.onTerrainChange();
     }
 
     update(state: InputState) {
-        // move the camera with the mouse
         this.scene.camera.update(state);
         this.scene.sun.pos = this.scene.camera.getActualPosition();
         this.updateCursor(state);
     }
 
     draw(gl: WebGLRenderingContext) {
-        // get to-screen matrix
-        const canvas = gl.canvas as HTMLCanvasElement;
-
-        // render the grid
-        // this.greyLineRenderer.render(gl, matrix);
-        // this.whiteLineRenderer.render(gl, matrix);
-
-        // this.redLineRenderer.setAndRender(gl, matrix, this.cursorVisual!);
-
-        // render the map
-        // TODO create MeshArray
         this.phongShader.draw(this.scene);
         this.dr.render(this.scene);
         this.ds.draw(this.scene);
+        this.dotsShader.render(this.scene);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    onTerrainChange() {
+        this.dotsShader.set(this.terrain.bufferToPoints());
     }
 
     addPreviewCube(point: Vector3) {
-        let cubeCenter = this.mapToWorld(point);
-        let cube = this.createCube(cubeCenter);
+        let cubeCenter = this.terrain.mapToWorld(point);
+        let cube = Cube.fromRadius(cubeCenter, this.terrain.cellSize / 2);
         let m = Mesh.fromCube(cube).ToShaderMesh();
         m.calculateFaceNormals();
         this.dr.set(m, "preview-cube");
@@ -152,37 +104,133 @@ export class MarchingCubeApp extends App {
 
         // figure out which cube we are pointing to
         this.flushPreviewCubes();
-        let [cubeID, cubeIDprevious] = this.voxelRaycast(mouseRay, 40);
+        let [cubeID, cubeIDprevious] = this.terrain.voxelRaycast(mouseRay, 40);
         if (cubeID == -1) {
-            // nothing else to do
+            // this.dr.set(Mesh.zero(), "preview-cube");
             return;
         }
 
-        let cubeCursor = this.map.getCoords(cubeIDprevious);
+        let cubeCursor = this.terrain.intCube.getCoords(cubeIDprevious);
         this.addPreviewCube(cubeCursor);
 
         // render cube at this position
-
         // this.geo.push(Mesh.fromCube(cube));
 
         // click
         if (state.mouseLeftPressed) {
             console.log("click");
             if (state.IsKeyDown(" ")) {
-                if (this.map.data[cubeID] == 0) return;
-                this.map.data[cubeID] = 0;
-                this.bufferMap();
-            } else if (this.map.data[cubeIDprevious] != 1) {
-                this.map.data[cubeIDprevious] = 1;
-                this.bufferMap();
+                if (this.terrain.intCube.data[cubeID] == 0) return;
+                this.terrain.intCube.data[cubeID] = 0;
+                this.onTerrainChange();
+            } else if (this.terrain.intCube.data[cubeIDprevious] != 1) {
+                this.terrain.intCube.data[cubeIDprevious] = 1;
+                this.onTerrainChange();
             }
         }
     }
+}
 
-    // return the ID of the
-    // A Fast Voxel Traversal Algorithm for Ray Tracing
-    // Amanatides, Woo
-    // Dept. of Computer Science
+/**
+ * Represents a 3D interactible terrain, minecraft style.
+ */
+class Terrain {
+    
+    private constructor(
+        public intCube: IntCube,
+        public size: number,
+        public cellSize: number,
+        public halfSize: number,
+        public halfSizePlus: number,
+    ) {}
+
+    static new(size: number, cellSize: number) {
+
+        let intCube = IntCube.new(size, size, size);
+        // let dimentions = Vector3.new(size, size, size);
+        let halfSize = size / 2;
+        let halfSizePlus = halfSize + cellSize / 2;
+
+        return new Terrain(intCube, size, cellSize, halfSize, halfSizePlus);
+
+
+    }
+
+    static fromPerlin(size: number, cellSize: number) {
+        let terrain = Terrain.new(size, cellSize);
+        let perlin = new Perlin();
+        let scale = 0.20;
+        terrain.intCube.map((value, i) => {
+    
+            let c = terrain.intCube.getCoords(i);
+            let noise = perlin.noise(c.x * scale, c.y * scale, c.z * scale);
+    
+            if (i < 10) {
+                // console.log(c);
+                // console.log(noise);
+            }
+    
+            if (noise > 0.60) {
+                return 1;
+            } else {
+                return value;
+            }
+        })
+    
+        return terrain;
+    }
+
+    worldToMap(coord: Vector3): Vector3 {
+        return coord.clone().addN(this.halfSizePlus).floored();
+    }
+
+    mapToWorld(point: Vector3): Vector3 {
+        return point.clone().addN(-this.halfSize);
+    }
+
+    bufferToPoints() {
+        let centers:Vector3[] = [];
+        this.intCube.iter((entry, index) => {
+            if (entry == 1) {
+                let mapCoord = this.intCube.getCoords(index);
+                let coord = this.mapToWorld(mapCoord);
+                centers.push(coord);
+            }
+        });
+        return centers;
+    }
+
+    bufferToVoxels() : Mesh {
+        let mapGeo: Mesh[] = [];
+        let centers:Vector3[] = [];
+        this.intCube.iter((entry, index) => {
+            if (entry == 1) {
+                let mapCoord = this.intCube.getCoords(index);
+                let coord = this.mapToWorld(mapCoord);
+                centers.push(coord);
+                // let cube = this.createCube(coord);
+                // mapGeo.push(Mesh.fromCube(cube));
+            }
+        });
+
+        let mesh = Mesh.fromJoin(mapGeo);
+        mesh = mesh.toLinearMesh();
+        mesh.ensureMultiFaceNormals();
+        mesh.ensureUVs();
+        return mesh;
+    }
+
+    bufferToMarchingCubes() {
+
+    }
+
+
+    /**
+     * return the ID of the
+     * A Fast Voxel Traversal Algorithm for Ray Tracing
+     * Amanatides, Woo
+     * Dept. of Computer Science
+     */
     voxelRaycast(ray: Ray, range: number): [number, number] {
         let startPoint = this.worldToMap(ray.origin);
         let voxelCenter = this.mapToWorld(startPoint);
@@ -229,7 +277,7 @@ export class MarchingCubeApp extends App {
         }
 
         // debug ray
-        // let lineSets: LineArray[] = [ray.toLine(100), LineArray.fromPlane(xy), LineArray.fromPlane(yz), LineArray.fromPlane(xz)];
+        // let lineSets: MultiLine[] = [ray.toLine(100), MultiLine.fromPlane(xy), MultiLine.fromPlane(yz), MultiLine.fromPlane(xz)];
         // this.whiteLineRenderer.set(this.gl, LineArray.fromJoin(lineSets), DrawSpeed.StaticDraw);
 
         // console.log("voxel raycast initialized with:");
@@ -240,15 +288,16 @@ export class MarchingCubeApp extends App {
         // console.log("cast away!");
         // this.addPreviewCube(new Vector3(x,y,z));
         // console.log(x,y,z);
+        let intCube = this.intCube;
         for (let i = 0; i < range; i++) {
             // this.addPreviewCube(new Vector3(xprev,yprev,zprev));
 
             // if hit, return previous
-            let value = this.map.tryGet(x, y, z);
+            let value = intCube.tryGet(x, y, z);
             if (value == 1) {
                 // console.log("found a cube after " + i + "steps...");
                 // this.addPreviewCube(new Vector3(xprev,yprev,zprev));
-                return [this.map.getIndex(x, y, z), this.map.getIndex(xprev, yprev, zprev)];
+                return [intCube.getIndex(x, y, z), intCube.getIndex(xprev, yprev, zprev)];
             } else {
                 xprev = x;
                 yprev = y;
@@ -273,46 +322,5 @@ export class MarchingCubeApp extends App {
         return [-1, -1];
     }
 
-    // flush this.meshRenderer
-    // turn this.map into this.mapGeo
-    bufferMap() {
-        let mapGeo: Mesh[] = [];
-        this.map.iter((entry, index) => {
-            if (entry == 1) {
-                let mapCoord = this.map.getCoords(index);
-                let coord = this.mapToWorld(mapCoord);
-                let cube = this.createCube(coord);
-                mapGeo.push(Mesh.fromCube(cube));
-            }
-        });
-
-        let mesh = Mesh.fromJoin(mapGeo);
-        mesh = mesh.toLinearMesh();
-        mesh.ensureMultiFaceNormals();
-        mesh.ensureUVs();
-        let e = Entity.new(undefined, Model.new(mesh, Material.newPurple()))
-        e.model.material.specularDampner = 2
-        e.model.mesh = mesh;
-        this.phongShader.load(e, DrawSpeed.StaticDraw);
-    }
-
-    worldToMap(coord: Vector3): Vector3 {
-        let halfsize = this.size / 2 + this.cellSize / 2;
-        return coord.added(new Vector3(halfsize, halfsize, halfsize)).floored();
-    }
-
-    mapToWorld(point: Vector3): Vector3 {
-        let halfsize = this.size / 2;
-        return point.added(new Vector3(-halfsize, -halfsize, -halfsize));
-    }
-
-    createCube(center: Vector3) {
-        let hs = this.cellSize / 2;
-        let move = Matrix4.newTranslation(center.x, center.y, center.z);
-        let cube = new Cube(
-            Plane.WorldXY().transform(move),
-            Domain3.fromBounds(-hs, hs, -hs, hs, -hs, hs),
-        );
-        return cube;
-    }
 }
+
