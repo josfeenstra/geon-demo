@@ -4,13 +4,14 @@
 
 import { NormalShader } from "Engine/render/shaders-old/mesh-normals-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene, PhongShader, Entity, Model } from "Geon";
+import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene, PhongShader, Entity, Model, SkyBoxShader } from "Geon";
 
 
 export class IcosahedronApp extends App {
-    camera: Camera;
+    scene: Scene;
     meshRend: PhongShader;
     normalRend: NormalShader;
+    skyboxShader: SkyBoxShader;
 
     rotate!: Parameter;
     inner!: Parameter;
@@ -23,9 +24,10 @@ export class IcosahedronApp extends App {
     constructor(gl: WebGLRenderingContext) {
         super(gl);
         let canvas = gl.canvas as HTMLCanvasElement;
-        this.camera = new Camera(canvas, 8, true);
+        this.scene = new Scene(new Camera(canvas, 8, true));
         this.meshRend = new PhongShader(gl);
         this.normalRend = new NormalShader(gl);
+        this.skyboxShader = new SkyBoxShader(gl);
     }
 
     getIcosahedron(): Graph {
@@ -111,13 +113,17 @@ export class IcosahedronApp extends App {
         let e = Entity.new(undefined, Model.new(mesh, undefined)); 
         this.meshRend.load(e);
         this.isocahedron = e;
-        // this.normalRend.set(this.graph.toRenderable(), DrawSpeed.DynamicDraw);
-
-        // console.log("all loops: ", this.graph.allLoops());
+        this.skyboxShader.load([
+            "./data/textures/corona_ft.png", 
+            "./data/textures/corona_bk.png", 
+            "./data/textures/corona_up.png", 
+            "./data/textures/corona_dn.png", 
+            "./data/textures/corona_rt.png", 
+            "./data/textures/corona_lf.png"]);
     }
 
     update(state: InputState) {
-        this.camera.update(state);
+        this.scene.camera.update(state);
 
         if (!state.mouseRightDown && this.rotate.get() == 1) {
             let alpha = 0.0002 * state.tick;
@@ -129,9 +135,9 @@ export class IcosahedronApp extends App {
     }
 
     draw(gl: WebGLRenderingContext) {
-        let scene = new Scene(this.camera);
-        this.meshRend.draw(scene);
-        // this.normalRend.render(gl, this.camera);
+        
+        this.meshRend.draw(this.scene);
+        this.skyboxShader.draw(this.scene);
     }
 }
 

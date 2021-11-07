@@ -7,7 +7,6 @@ import { BezierApp } from "./apps/geometry-apps/bezier-app";
 import { BezierCpApp } from "./apps/geometry-apps/bezier-cp-app";
 import { IcosahedronApp } from "./apps/geometry-apps/icosahedron-app";
 import { LoftApp } from "./apps/geometry-apps/loft-app";
-import { MarchingCubeApp } from "./apps/geometry-apps/marching-cube-app";
 import { SplineApp } from "./apps/geometry-apps/spline.app";
 import { SurfaceApp } from "./apps/geometry-apps/surface-app";
 import { SurfaceCpApp } from "./apps/geometry-apps/surface-cp-app";
@@ -29,6 +28,9 @@ import { TorusApp } from "./apps/geometry-apps/torus-app";
 import { CannyApp } from "./apps/scientific-apps/canny-app";
 import { DrawTargetApp } from "./apps/render-apps/draw-target-app";
 import { LeastSquaresCircleApp } from "./apps/math-apps/least-squares-circle-app";
+import { SkyboxApp } from "./apps/render-apps/skybox-app";
+import { SphericalFourApp } from "./apps/spherical-apps/spherical-four-app";
+import { MarchingCubeApp } from "./apps/7/marching-app";
 
 
 function main() {
@@ -45,13 +47,14 @@ function main() {
 
     // init swap app
     let appCollection = [
+        MarchingCubeApp,
+        SkyboxApp,
         LeastSquaresCircleApp,
         DrawTargetApp,
         CannyApp,
         TorusApp,
         ZebraApp,
         CubesPhongApp,
-        // MarchingCubeApp,
         PhongApp,
         MultiRendererApp,
         BillboardApp,
@@ -65,6 +68,7 @@ function main() {
         SphericalOneApp,
         SphericalTwoApp,
         SphericalThreeApp,
+        SphericalFourApp,
         IcosahedronApp,
         DotApp3,
         LeastSquaresApp,
