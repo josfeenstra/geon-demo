@@ -244,7 +244,7 @@ export class GeometryApp extends App {
             // this.addPreviewCube(new Vector3(xprev,yprev,zprev));
 
             // if hit, return previous
-            let value = this.map.tryGet(x, y, z);
+            let value = this.map.tryGet(x, y, z, -1);
             if (value == 1) {
                 // console.log("found a cube after " + i + "steps...");
                 // this.addPreviewCube(new Vector3(xprev,yprev,zprev));

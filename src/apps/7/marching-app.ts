@@ -13,14 +13,15 @@ import { DepthMeshShader } from "Engine/render/shaders/DepthMeshShader"
 import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, 
     IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, 
     Domain3, DebugRenderer, DrawSpeed, Entity, Perlin, MultiShader, 
-    marchingCubes, MultiVector3, IntMatrix, getLongDefaultIndices } from "Geon";
+    marchingCubes, MultiVector3, IntMatrix, getLongDefaultIndices, getDefaultIndices, SkyBoxShader } from "Geon";
 
 export class MarchingCubeApp extends App {
     // renderinfo
-    phongShader!: PhongShader;
+    chunkShaders: PhongShader[];
     dotsShader: DotShader;
     dr!: DebugRenderer;
     ds!: DepthMeshShader;
+    skyShader: SkyBoxShader;
 
     scene: Scene;
 
@@ -34,31 +35,38 @@ export class MarchingCubeApp extends App {
     cursorVisual?: MultiLine;
 
     // logic data
-    size = 5;
+    size = 50;
     cellSize = 1;
+    perlinScale = 0.1;
 
     terrain!: VoxelTerrain;
-    terrainEntity: Entity;
+
+    chunks: Mesh[] = [];
 
     constructor(gl: WebGLRenderingContext) {
         // setup render env
         super(gl);
         let camera = new Camera(gl.canvas! as HTMLCanvasElement, 10, true);
         this.scene = new Scene(camera);
-        this.phongShader = new PhongShader(gl);
+        this.chunkShaders = [];
+
         this.dr = DebugRenderer.new(gl);
         this.ds = new DepthMeshShader(gl);
         this.dotsShader = new DotShader(gl);
-
-        let e = Entity.new(undefined, Model.new(undefined, Material.grey()))
-        e.model.material.specularDampner = 2
-        this.terrainEntity = e;
+        this.skyShader = new SkyBoxShader(gl);
     }
 
     start() {
-        this.terrain = VoxelTerrain.fromPerlin(this.size, this.cellSize, 0.50);
-        
+        this.terrain = VoxelTerrain.fromPerlin(this.size, this.cellSize, this.perlinScale);
         this.onTerrainChange();
+
+        this.skyShader.load([
+            "./data/textures/corona_ft.png", 
+            "./data/textures/corona_bk.png", 
+            "./data/textures/corona_up.png", 
+            "./data/textures/corona_dn.png", 
+            "./data/textures/corona_rt.png", 
+            "./data/textures/corona_lf.png"]);
     }
 
     update(state: InputState) {
@@ -68,21 +76,42 @@ export class MarchingCubeApp extends App {
     }
 
     draw(gl: WebGLRenderingContext) {
-        this.phongShader.draw(this.scene);
         this.dr.render(this.scene);
         this.ds.draw(this.scene);
-        this.dotsShader.render(this.scene);
+        // this.dotsShader.render(this.scene);
+        this.drawChunks(this.scene);
+        this.skyShader.draw(this.scene);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    onTerrainChange() {
-        let mcMesh = this.terrain.bufferToMarchingCubes();
+    drawChunks(scene: Scene) {
+        for (let c of this.chunkShaders) {
+            c.draw(scene);
+        }
+    }
 
-        this.terrainEntity.model.mesh = mcMesh;
+    onTerrainChange() {
+        // let mcMesh = this.terrain.bufferToMarchingCubes();
+        this.chunkShaders = [];
+        this.chunks = this.terrain.bufferToMarchingCubesChunks();
+        
+        let grey = Material.newPurple();
+        grey.specularDampner = 2;
+        for (let chunk of this.chunks) {
+            let ps = new PhongShader(this.gl);
+            let e = Entity.new(undefined, Model.new(chunk, grey))
+            ps.load(e);
+            this.chunkShaders.push(ps);
+        }
+
+
+        // this.terrainEntity.model.mesh = mcMesh;
         // this.phongShader.load(this.terrainEntity, DrawSpeed.StaticDraw);
         this.dotsShader.set(this.terrain.bufferToPoints());
-        this.dr.set(mcMesh, "mc");
+
+
+        // this.dr.set(mcMesh, "mc");
     }
 
     addPreviewCube(point: Vector3) {
@@ -169,6 +198,11 @@ class VoxelTerrain {
         terrain.intCube.map((value, i) => {
     
             let c = terrain.intCube.getCoord(i);
+            if (terrain.intCube.isOnEdge(c.x, c.y, c.z)) {
+                return 0;
+            }
+
+
             let noise = perlin.noise(offset.x + c.x * scale, offset.y + c.y * scale, offset.z + c.z * scale);
     
             if (i < 10) {
@@ -242,28 +276,86 @@ class VoxelTerrain {
             };
 
             // gather a 2x2x2 cube of values
-            let corners: Vector3[] = [];
-            let values: number[] = [];
-            for (let x of [coord.x + 1, coord.x]) {
-            for (let y of [coord.y, coord.y + 1]) {
-            for (let z of [coord.z + 1, coord.z]) {
-                        corners.push(this.mapToWorld(Vector3.new(x,y,z)));
-                        values.push(this.intCube.tryGet(x,y,z)!);
-                        // console.log("la")
-            }}}    
-            // console.log(corners);
+            
+            let coords = [
+                Vector3.new(coord.x, coord.y, coord.z),
+                Vector3.new(coord.x+1, coord.y, coord.z),
+                Vector3.new(coord.x+1, coord.y+1, coord.z),
+                Vector3.new(coord.x, coord.y+1, coord.z),
+                Vector3.new(coord.x, coord.y,     coord.z + 1),
+                Vector3.new(coord.x+1, coord.y,   coord.z + 1),
+                Vector3.new(coord.x+1, coord.y+1, coord.z + 1),
+                Vector3.new(coord.x, coord.y+1,   coord.z + 1),
+            ];
+            let values = coords.map((v) => this.intCube.tryGet(v.x,v.y,v.z, 0));
+            let corners = coords.map((v) => this.mapToWorld(Vector3.new(v.x,v.y,v.z)));
+
             vertices.push(...mc(corners, values, level));
         });
 
         let intMatrix = IntMatrix.new(vertices.length / 3, 3, getLongDefaultIndices(vertices.length))
-
         let mesh = Mesh.new(MultiVector3.fromList(vertices), intMatrix);
-        // mesh = mesh.toLinearMesh();
-        // mesh.ensureMultiFaceNormals();
-        // mesh.ensureUVs();
+        mesh = mesh.toLinearMesh();
+        mesh.ensureMultiFaceNormals();
+        mesh.ensureUVs();
         return mesh;
 
 
+    }
+
+
+    bufferToMarchingCubesChunks(level = 0.5) : Mesh[] {
+
+        // get the marching cubes function
+        let mc = marchingCubes;
+        let vertices: Vector3[] = [];
+        let chunks: Mesh[] = [];
+
+        let createChunk = () => {
+            let intMatrix = IntMatrix.new(vertices.length / 3, 3, getDefaultIndices(vertices.length))
+            let chunk = Mesh.new(MultiVector3.fromList(vertices), intMatrix);
+            chunk.calcAndSetFaceNormals();
+            chunk = chunk.toLinearMesh();
+            // chunk.ensureMultiFaceNormals();
+            chunk.ensureUVs();
+            chunks.push(chunk);
+        };
+
+        this.intCube.iter((value, index) => {
+            if (vertices.length > 60000) {
+                createChunk();
+                // flush vertices, to create a new chunk
+                vertices = [];
+            }
+            let coord = this.intCube.getCoord(index)
+            
+            // stay away from the last ones 
+            if (coord.x > this.intCube._width - 2  ||
+                coord.y > this.intCube._height - 2 ||
+                coord.z > this.intCube._depth - 2) {
+                return;
+            };
+
+            // gather a 2x2x2 cube of values
+            
+            let coords = [
+                Vector3.new(coord.x, coord.y, coord.z),
+                Vector3.new(coord.x+1, coord.y, coord.z),
+                Vector3.new(coord.x+1, coord.y+1, coord.z),
+                Vector3.new(coord.x, coord.y+1, coord.z),
+                Vector3.new(coord.x, coord.y,     coord.z + 1),
+                Vector3.new(coord.x+1, coord.y,   coord.z + 1),
+                Vector3.new(coord.x+1, coord.y+1, coord.z + 1),
+                Vector3.new(coord.x, coord.y+1,   coord.z + 1),
+            ];
+            let values = coords.map((v) => this.intCube.tryGet(v.x,v.y,v.z, 0));
+            let corners = coords.map((v) => this.mapToWorld(Vector3.new(v.x,v.y,v.z)));
+
+            vertices.push(...mc(corners, values, level));
+        });
+
+        createChunk();
+        return chunks;
     }
 
 
@@ -335,7 +427,7 @@ class VoxelTerrain {
             // this.addPreviewCube(new Vector3(xprev,yprev,zprev));
 
             // if hit, return previous
-            let value = intCube.tryGet(x, y, z);
+            let value = intCube.tryGet(x, y, z, -1);
             if (value == 1) {
                 // console.log("found a cube after " + i + "steps...");
                 // this.addPreviewCube(new Vector3(xprev,yprev,zprev));
