@@ -13,10 +13,10 @@ import { DepthMeshShader } from "Engine/render/shaders/DepthMeshShader"
 import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, 
     IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, 
     Domain3, DebugRenderer, DrawSpeed, Entity, Perlin, MultiShader, 
-    marchingCubes, MultiVector3, IntMatrix, getLongDefaultIndices, getDefaultIndices, SkyBoxShader } from "Geon";
+    marchingCubes, MultiVector3, IntMatrix, getLongDefaultIndices, getDefaultIndices, SkyBoxShader, Color, COLOR } from "Geon";
 
 export class MarchingCubeApp extends App {
-    // renderinfo
+
     chunkShaders: PhongShader[];
     dotsShader: DotShader;
     dr!: DebugRenderer;
@@ -24,6 +24,8 @@ export class MarchingCubeApp extends App {
     skyShader: SkyBoxShader;
 
     scene: Scene;
+    planetShader!: PhongShader;
+    sunShader!: PhongShader;
 
     // geo data
     plane: Plane = Plane.WorldXY();
@@ -40,13 +42,13 @@ export class MarchingCubeApp extends App {
     perlinScale = 0.1;
 
     terrain!: VoxelTerrain;
-
     chunks: Mesh[] = [];
 
     constructor(gl: WebGLRenderingContext) {
         // setup render env
         super(gl);
         let camera = new Camera(gl.canvas! as HTMLCanvasElement, 10, true);
+        camera.zFar = 10000000;
         this.scene = new Scene(camera);
         this.chunkShaders = [];
 
@@ -60,6 +62,8 @@ export class MarchingCubeApp extends App {
         this.terrain = VoxelTerrain.fromPerlin(this.size, this.cellSize, this.perlinScale);
         this.onTerrainChange();
 
+
+        // create the world: skybox | sun | planet
         this.skyShader.load([
             "./data/textures/corona_ft.png", 
             "./data/textures/corona_bk.png", 
@@ -67,11 +71,27 @@ export class MarchingCubeApp extends App {
             "./data/textures/corona_dn.png", 
             "./data/textures/corona_rt.png", 
             "./data/textures/corona_lf.png"]);
+        
+        
+        let sunpos = Vector3.new(-1000000, -1000000, 0);
+        this.scene.sun.pos.copy(sunpos);
+        let sunmesh = Mesh.newSphere(sunpos, 50000, 20, 20);
+        this.sunShader = PhongShader.new(this.gl);
+        this.sunShader.load(Entity.new(undefined, Model.new(sunmesh, Material.neutral())));
+
+        let planetpos = Vector3.new(-10000, 10000, 1000);
+        let planetMesh = Mesh.newSphere(planetpos, 5000, 40, 40);
+        planetMesh.calcAndSetVertexNormals();
+        this.planetShader = PhongShader.new(this.gl);
+        let planetMat = Material.default();
+        planetMat.specularDampner = 0.0001;
+        planetMat.specular = COLOR.black;
+        this.planetShader.load(Entity.new(undefined, Model.new(planetMesh, Material.default())));
     }
 
     update(state: InputState) {
         this.scene.camera.update(state);
-        this.scene.sun.pos = this.scene.camera.getActualPosition();
+        // this.scene.sun.pos = this.scene.camera.getActualPosition();
         this.updateCursor(state);
     }
 
@@ -81,6 +101,8 @@ export class MarchingCubeApp extends App {
         // this.dotsShader.render(this.scene);
         this.drawChunks(this.scene);
         this.skyShader.draw(this.scene);
+        this.sunShader.draw(this.scene);
+        this.planetShader.draw(this.scene);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -96,20 +118,31 @@ export class MarchingCubeApp extends App {
         this.chunkShaders = [];
         this.chunks = this.terrain.bufferToMarchingCubesChunks();
         
-        let grey = Material.newPurple();
-        grey.specularDampner = 2;
+        const lBrown = Color.fromHex("7c5835")!;
+        const brown = Color.fromHex("66442c")!;
+        const browner = Color.fromHex("4c2b21")!;
+        const brownst = Color.fromHex("2e1915")!;
+        const black = COLOR.black;
+        const none = Color.fromHex("00000000")!;
+
+        let rockMaterial = new Material(
+            black,
+            lBrown,
+            none,
+            none,
+            10,
+            1,
+        )
         for (let chunk of this.chunks) {
             let ps = new PhongShader(this.gl);
-            let e = Entity.new(undefined, Model.new(chunk, grey))
+            let e = Entity.new(undefined, Model.new(chunk, rockMaterial))
             ps.load(e);
             this.chunkShaders.push(ps);
         }
 
-
         // this.terrainEntity.model.mesh = mcMesh;
         // this.phongShader.load(this.terrainEntity, DrawSpeed.StaticDraw);
         this.dotsShader.set(this.terrain.bufferToPoints());
-
 
         // this.dr.set(mcMesh, "mc");
     }
