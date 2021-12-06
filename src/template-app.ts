@@ -1,51 +1,47 @@
-import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene } from "Geon";
+import { App, Scene, DebugRenderer, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, LineShader } from "Geon";
 
-export class MultiRendererApp extends App {
-    // ui
-    params: Parameter[] = [];
-
-    // state
-    points!: MultiVector3;
-    Plsa!: MultiVector3;
-    Pnormal!: MultiVector3;
+export class TemplateApp extends App {
 
     // render
-    camera: Camera;
-    mr: DebugRenderer;
-    gs: LineShader;
+    scene: Scene;
+    debug: DebugRenderer;
+    grid: LineShader;
+    
+
     constructor(gl: WebGLRenderingContext) {
         super(gl);
 
         let canvas = gl.canvas as HTMLCanvasElement;
-        this.camera = new Camera(canvas, -2, true);
-        this.camera.set(-2, 1, 1);
-        this.gs = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
-        this.mr = DebugRenderer.new(gl);
+        let camera = new Camera(canvas, -2, true);
+        camera.set(-2, 1, 1);
+        this.grid = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
+        this.debug = DebugRenderer.new(gl);
+        this.scene = new Scene(camera);
+
+        // init some state
     }
 
-    start() {
+    async start() {
         this.startGrid();
 
-        // create something!
+        // fill some state | fill up shaders
+    
     }
 
     ui(ui: UI) {}
 
     startGrid() {
         let grid = MultiLine.fromGrid(Plane.WorldXY().moveTo(new Vector3(0, 0, -1)), 100, 2);
-        this.gs.set(grid, DrawSpeed.StaticDraw);
+        this.grid.set(grid, DrawSpeed.StaticDraw);
     }
 
     update(state: InputState) {
-        this.camera.update(state);
+        this.scene.camera.update(state);
+        // update state | fill up shaders
     }
 
     draw(gl: WebGLRenderingContext) {
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
-        let c = new Scene(this.camera);
-        this.gs.render(c);
-        this.mr.render(c);
+        this.grid.render(this.scene);
+        this.debug.render(this.scene);
     }
 }

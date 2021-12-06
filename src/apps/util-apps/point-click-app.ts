@@ -39,7 +39,7 @@ export class PointClickApp extends App {
     }
 
     resetCamera() {
-        this.scene.camera.z_offset = -10;
+        this.scene.camera.zoom = -10;
         this.scene.camera.angleAlpha = Math.PI * 0.25;
         this.scene.camera.angleBeta = Math.PI * 0.25;
     }

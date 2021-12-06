@@ -29,9 +29,10 @@ import { CannyApp } from "./apps/scientific-apps/canny-app";
 import { DrawTargetApp } from "./apps/render-apps/draw-target-app";
 import { LeastSquaresCircleApp } from "./apps/math-apps/least-squares-circle-app";
 import { SkyboxApp } from "./apps/render-apps/skybox-app";
-import { SphericalFourApp } from "./apps/spherical-apps/spherical-four-app";
-import { MarchingCubeApp } from "./apps/7/marching-app";
-
+import { SphericalApp } from "./apps/spherical-apps/spherical-app";
+import { MarchingCubeApp } from "./apps/algo-apps/marching-app";
+import { MicApp } from "./apps/util-apps/mic-app";
+import { WaveApp } from "./apps/algo-apps/wave-app";
 
 function main() {
     // get references of all items on the canvas
@@ -41,12 +42,15 @@ function main() {
     // init core
     let gl = HelpGl.initWebglContext(canvas)!;
     let core = new Core(canvas, gl, ui);
+    HelpGl.resizeViewportToCanvas(gl);
 
     //@ts-ignore
     window.core = core;
 
     // init swap app
     let appCollection = [
+        WaveApp,
+        MicApp,
         MarchingCubeApp,
         SkyboxApp,
         LeastSquaresCircleApp,
@@ -65,10 +69,10 @@ function main() {
         SurfaceCpApp,
         SplineApp,
         LoftApp,
-        SphericalOneApp,
-        SphericalTwoApp,
+        SphericalApp,
         SphericalThreeApp,
-        SphericalFourApp,
+        SphericalTwoApp,
+        SphericalOneApp,
         IcosahedronApp,
         DotApp3,
         LeastSquaresApp,

@@ -1,5 +1,102 @@
 import { EdgeIndex, Graph, IntMatrix, Mesh, Plane, ShaderMesh, Vector3 } from "Geon";
 
+
+export namespace Spherical {
+
+    export function createSphere(liftType=1, subCount=2, quadSubCount=1, randomEdges=true, smooth=true) {
+    
+        // 0 | setup
+        const mesh = Mesh.newIcosahedron(0.5);
+        let graph = mesh.toGraph();
+        let center = new Vector3(0, 0, 0);
+        let radius = 1;
+        let smoothlimit = 0;
+    
+        if (liftType == 2) {
+            radius = 1;
+        } else {
+            radius = graph.getVertexPos(0).disTo(center);
+        }
+    
+        // 1 | subdivide
+        for (let i = 0; i < subCount; i++) {
+            graph.subdivide();
+    
+            // lift to sphere after every subdivision
+            if (liftType > 0) {
+                let count = graph.getVertexCount();
+                for (let i = 0; i < count; i++) {
+                    let pos = graph.getVertexPos(i);
+                    let normal = pos;
+    
+                    let dis = center.disTo(pos);
+                    let lift = radius - dis;
+                    if (liftType > 1) {
+                        pos.add(normal.scaled(lift));
+                    } else {
+                        pos.add(normal.normalized().scaled(lift));
+                    }
+                }
+            }
+        }
+    
+        // 2 | remove random edges
+        if (randomEdges) {
+            quadification(graph);
+    
+            // graph.print();
+            // 2 | remove random edges
+            // let edges = graph.all();
+            // let picks: number[] = [];
+            // let pickCount = 100;
+            // for (let i = 0 ; i < pickCount; i++) {
+    
+            //     let p = randomInt(edges.length);
+            //     picks.push(edges[p]);
+            // }
+    
+            // // // console.log(picks);
+    
+            // for (let i = 0 ; i < edges.length; i++) {
+            //     if (Math.random() > 0.0) {
+            //         let ei = edges[i];
+            //         let loops = graph.getLoopsAdjacentToEdge(ei);
+            //         if (loops[0].length == 3 && loops[1].length == 3) {
+            //             graph.deleteEdgeFromIndex(edges[i]);
+            //         }
+            //     }
+            // }
+        }
+    
+        // 3 | subdivide quad
+        for (let i = 0; i < quadSubCount; i++) {
+            graph.subdivideQuad();
+        }
+    
+        // lift to sphere after every subdivision
+        if (liftType > 0) {
+            let count = graph.getVertexCount();
+            for (let i = 0; i < count; i++) {
+                let pos = graph.getVertexPos(i);
+                let normal = graph.getVertexNormal(i);
+    
+                let dis = center.disTo(pos);
+                let lift = radius - dis;
+                if (liftType > 1) {
+                    pos.add(normal.scaled(lift));
+                } else {
+                    pos.add(normal.normalized().scaled(lift));
+                }
+            }
+        }
+    
+        return graph;
+    }
+
+}
+
+
+
 export function createGraph(
     liftType: number,
     subcount: number,

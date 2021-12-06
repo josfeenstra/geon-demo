@@ -44,7 +44,7 @@ export class MeshInspectorApp extends App {
 
         // TODO abstract this to scene
         this.camera = new Camera(canvas, undefined, true);
-        this.camera.z_offset = -10;
+        this.camera.zoom = -10;
         this.camera.angleAlpha = 0.4;
         this.camera.angleBeta = 0.5;
 

@@ -91,7 +91,7 @@ export class MarchingCubeApp extends App {
 
     update(state: InputState) {
         this.scene.camera.update(state);
-        // this.scene.sun.pos = this.scene.camera.getActualPosition();
+        this.scene.sun.pos = this.scene.camera.getActualPosition();
         this.updateCursor(state);
     }
 
@@ -128,7 +128,7 @@ export class MarchingCubeApp extends App {
         let rockMaterial = new Material(
             black,
             lBrown,
-            none,
+            brown,
             none,
             10,
             1,

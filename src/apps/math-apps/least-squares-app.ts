@@ -106,7 +106,7 @@ export class LeastSquaresApp extends App {
     }
 
     resetCamera() {
-        this.camera.z_offset = -10;
+        this.camera.zoom = -10;
         this.camera.angleAlpha = Math.PI * 0.25;
         this.camera.angleBeta = Math.PI * 0.25;
     }
