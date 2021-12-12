@@ -73,7 +73,7 @@
 //         });
 //     }
 
-//     update(state: InputState) {
+//     update(input: InputHandler) {
 
 //     }
 

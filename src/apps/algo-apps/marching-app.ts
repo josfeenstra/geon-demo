@@ -13,7 +13,7 @@ import { DepthMeshShader } from "Engine/render/shaders/DepthMeshShader"
 import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, 
     IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, 
     Domain3, DebugRenderer, DrawSpeed, Entity, Perlin, MultiShader, 
-    marchingCubes, MultiVector3, IntMatrix, getLongDefaultIndices, getDefaultIndices, SkyBoxShader, Color, COLOR } from "Geon";
+    marchingCubes, MultiVector3, IntMatrix, getLongDefaultIndices, getDefaultIndices, SkyBoxShader, Color, COLOR, InputHandler, Key } from "Geon";
 
 export class MarchingCubeApp extends App {
 
@@ -89,13 +89,13 @@ export class MarchingCubeApp extends App {
         this.planetShader.load(Entity.new(undefined, Model.new(planetMesh, Material.default())));
     }
 
-    update(state: InputState) {
-        this.scene.camera.update(state);
+    update(input: InputHandler) {
+        this.scene.camera.update(input);
         this.scene.sun.pos = this.scene.camera.getActualPosition();
-        this.updateCursor(state);
+        this.updateCursor(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.dr.render(this.scene);
         this.ds.draw(this.scene);
         // this.dotsShader.render(this.scene);
@@ -159,9 +159,9 @@ export class MarchingCubeApp extends App {
         this.geo = [];
     }
 
-    updateCursor(state: InputState) {
+    updateCursor(input: InputHandler) {
         // render mouse to world line
-        let mouseRay = this.scene.camera.getMouseWorldRay(state.canvas.width, state.canvas.height);
+        let mouseRay = this.scene.camera.getMouseWorldRay(input.width, input.height);
 
         // snap to world
         // let cursor = mouseRay.at(mouseRay.xPlane(this.plane));
@@ -188,9 +188,8 @@ export class MarchingCubeApp extends App {
         // this.geo.push(Mesh.fromCube(cube));
 
         // click
-        if (state.mouseLeftPressed) {
-            console.log("click");
-            if (state.IsKeyDown(" ")) {
+        if (input.mouse!.leftPressed) {
+            if (input.keys?.isDown(Key.Space)) {
                 if (this.terrain.intCube.data[cubeID] == 0) return;
                 this.terrain.intCube.data[cubeID] = 0;
                 this.onTerrainChange();

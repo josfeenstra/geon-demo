@@ -11,7 +11,7 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { AmbientMeshShader } from "Engine/render/shaders/AmbientMeshShader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
-import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Domain3, Entity } from "Geon";
+import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Domain3, Entity, InputHandler, Key } from "Geon";
 
 
 export class PhongApp extends App {
@@ -167,11 +167,11 @@ export class PhongApp extends App {
         this.phong.loadOcclusion(data, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.camera.update(state);
+        this.camera.update(input);
 
-        if (state.IsKeyPressed("k")){
+        if (input.keys?.isPressed(Key.K)){
             console.log(this.camera.worldMatrix.inverse().multiplyVector(Vector3.new()));
             
             console.log(this.camera.pos);
@@ -183,7 +183,7 @@ export class PhongApp extends App {
         }
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         // this.phong.draw(this.scene);
         this.phong.draw(this.scene);
         this.lineRenderer.render(this.scene);

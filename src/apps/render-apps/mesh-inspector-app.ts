@@ -11,7 +11,7 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { AmbientMeshShader } from "Engine/render/shaders/AmbientMeshShader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
-import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Entity } from "Geon";
+import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, Scene, DrawSpeed, Matrix4, Entity, InputHandler } from "Geon";
 
 
 export class MeshInspectorApp extends App {
@@ -136,12 +136,12 @@ export class MeshInspectorApp extends App {
         // this.dotRenderer.set(mesh.verts, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.camera.update(state);
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         // TODO abstract this to 'scene'
         let c = new Scene(this.camera);
         this.dotRenderer.render(c);

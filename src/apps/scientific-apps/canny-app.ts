@@ -1,4 +1,4 @@
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, loadImageFromSrc, Bitmap as Texture, ImageMesh, TransformLineShader, LineShader, ImageProcessing, HelpGl, Kernels, EnumParameter, Vector2, COLOR } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, loadImageFromSrc, Bitmap as Texture, ImageMesh, TransformLineShader, LineShader, ImageProcessing, HelpGl, Kernels, EnumParameter, Vector2, COLOR, InputHandler } from "Geon";
 
 // const PATHS_TO_TEXTURE = ["./data/eyes/eyes-1.jpeg", "./data/eyes/eyes-2.jpeg","./data/eyes/eyes-3.jpeg"];
 
@@ -114,11 +114,11 @@ export class CannyApp extends App {
         })
     }
 
-    update(state: InputState) {
-        this.scene.camera.update(state);
+    update(input: InputHandler) {
+        this.scene.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.dr.render(this.scene);
     }
 }

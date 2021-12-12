@@ -2,7 +2,7 @@
 
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
-import { App, Parameter, EnumParameter, Graph, ShaderMesh, Scene, Camera, UI, Mesh, Vector3, DrawSpeed, InputState, Matrix4 } from "Geon";
+import { App, Parameter, EnumParameter, Graph, ShaderMesh, Scene, Camera, UI, Mesh, Vector3, DrawSpeed, InputState, Matrix4, InputHandler } from "Geon";
 import { quadification, averageEdgeLength, constructMeshFromSphereGraph, squarification, laPlacian } from "./spherical";
 
 
@@ -164,15 +164,15 @@ export class SphericalTwoApp extends App {
         ).ToShaderMesh();
     }
 
-    update(state: InputState) {
-        this.c.camera.update(state);
+    update(input: InputHandler) {
+        this.c.camera.update(input);
 
-        let pulse = Math.sin(state.newTime);
+        let pulse = Math.sin(input.time.newTime);
 
         // rotate mesh
         if (this.rotate.get() == 1) {
             // rotate
-            let alpha = 0.0001 * state.tick;
+            let alpha = 0.0001 * input.time.tick;
             let rotx = Matrix4.newXRotation(alpha);
             let roty = Matrix4.newYRotation(alpha);
             let rot = rotx.multiply(roty);
@@ -208,7 +208,7 @@ export class SphericalTwoApp extends App {
         // this.graphRend.set(this.graph, DrawSpeed.DynamicDraw);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         for (let world of [this.world, this.world2, this.world3]) {
             this.meshRend.setAndRender(world, this.c);
         }

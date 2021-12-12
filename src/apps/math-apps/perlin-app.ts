@@ -1,5 +1,5 @@
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, Perlin, MultiVector3, Camera, DotShaderWithHeight, Random, UI, Domain2, Vector3, DrawSpeed, MultiLine, Plane, InputState, Scene } from "Geon";
+import { App, Parameter, Perlin, MultiVector3, Camera, DotShaderWithHeight, Random, UI, Domain2, Vector3, DrawSpeed, MultiLine, Plane, InputState, Scene, InputHandler } from "Geon";
 
 export class PerlinApp extends App {
     // ui
@@ -71,8 +71,8 @@ export class PerlinApp extends App {
         this.lrGrid.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
 
         let perlinMove = this.params[2].get() == 1;
         if (perlinMove) {
@@ -81,7 +81,7 @@ export class PerlinApp extends App {
             let news = MultiVector3.new(this.dots.count);
             for (let i = 0; i < this.dots.count; i++) {
                 let v = this.dots.get(i);
-                let n = this.perlin.noise(v.x, v.y, state.newTime * 0.0001 * speed) * factor;
+                let n = this.perlin.noise(v.x, v.y, input.time.newTime * 0.0001 * speed) * factor;
                 v.z = n;
                 news.set(i, v);
             }
@@ -89,7 +89,7 @@ export class PerlinApp extends App {
         }
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         let c = new Scene(this.camera);
 
         this.lrGrid.render(c);

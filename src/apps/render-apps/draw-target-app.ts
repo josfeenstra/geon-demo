@@ -2,7 +2,7 @@ import { Material } from "Engine/render/basics/Material";
 import { Model } from "Engine/render/basics/Model";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, Entity, DrawTarget, TextureMeshShader, TexturedMeshShader, ShaderMesh, Rectangle3 } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, Entity, DrawTarget, TextureMeshShader, TexturedMeshShader, ShaderMesh, Rectangle3, InputHandler } from "Geon";
 
 export class DrawTargetApp extends App {
     // ui
@@ -38,8 +38,10 @@ export class DrawTargetApp extends App {
 
     start() {
         this.startGrid();
-        this.entity.model.mesh.calcAndSetFaceNormals();
-        this.entity.model.mesh.ensureUVs();
+        this.entity.model.mesh = this.entity.model.mesh.toLinearMesh();
+        let m = this.entity.model.mesh;
+        m.calcAndSetVertexNormals();
+        m.ensureUVs();
         this.ps.load(this.entity, DrawSpeed.StaticDraw);
     }
 
@@ -53,28 +55,28 @@ export class DrawTargetApp extends App {
         this.ts.load(Mesh.fromRectDoubleSided(Rectangle3.new(Plane.WorldYZ().moveTo(Vector3.new(3,0,3)), Domain2.fromRadius(4))))
     }
 
-    update(state: InputState) {
-        this.scene.camera.update(state);
-        let r = 0.0005 * state.tick;
+    update(input: InputHandler) {
+        this.scene.camera.update(input);
+        let r = 0.0005 * input.time.tick;
         this.entity.position.multiply(Matrix4.newYRotation(r));
         this.entity.position.multiply(Matrix4.newZRotation(-r));
         this.entity.position.multiply(Matrix4.newXRotation(r));
         this.ps.loadPosition(this.entity.position);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         
         // unload to prevent a cyclical pattern
         this.ts.loadTexture(this.drawTarget.width, this.drawTarget.height, null);
 
         // set a texture
-        this.drawTarget.bind(gl);
+        this.drawTarget.bind(this.gl);
 
         this.gs.render(this.scene);
         this.ts.draw(this.scene);
         this.ps.draw(this.scene);
 
-        this.drawTarget.unbind(gl);
+        this.drawTarget.unbind(this.gl);
 
         this.ts.loadTexture(this.drawTarget.width, this.drawTarget.height, this.drawTarget.texture);
 

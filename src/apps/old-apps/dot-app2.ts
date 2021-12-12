@@ -2,7 +2,7 @@
 // purpose : test with Renderers, Domains & Vectors
 
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
-import { App, Vector2, Domain2, Scene, Camera, Random, InputState } from "Geon";
+import { App, Vector2, Domain2, Scene, Camera, Random, InputState, InputHandler } from "Geon";
 
 
 export class DotApp2 extends App {
@@ -35,7 +35,7 @@ export class DotApp2 extends App {
         }
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         for (let i = 0; i < this.dots.length; i++) {
             // these 'should' be pointers, but check this
             let dot = this.dots[i];
@@ -46,12 +46,10 @@ export class DotApp2 extends App {
             if (!this.bounds.y.includes(dot.y)) dir.y = -dir.y;
 
             dot.add(dir);
-
-            if (state.IsKeyDown(" ")) console.log(dot);
         }
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.renderer.render(this.context);
     }
 }

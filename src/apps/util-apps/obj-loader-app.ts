@@ -6,7 +6,7 @@ import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { TextureMeshShader } from "Engine/render/shaders-old/texture-mesh-shader";
-import { App, Camera, ShaderMesh, MultiLine, addDropFileEventListeners, InputState, Scene, MultiVector3, Vector3, loadTextFromFile, meshFromObj, Domain3, DrawSpeed, DebugRenderer, loadImageFromFile, Bitmap as Texture } from "Geon";
+import { App, Camera, ShaderMesh, MultiLine, addDropFileEventListeners, InputState, Scene, MultiVector3, Vector3, loadTextFromFile, meshFromObj, Domain3, DrawSpeed, DebugRenderer, loadImageFromFile, Bitmap as Texture, InputHandler } from "Geon";
 
 export class ObjLoaderApp extends App {
     
@@ -28,16 +28,14 @@ export class ObjLoaderApp extends App {
         // nothing
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.camera.update(state);
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         // get to-screen matrix
         let c = new Scene(this.camera);
-        const canvas = gl.canvas as HTMLCanvasElement;
-        
         this.dr.render(c);
         this.tr.render(c);
         // if (this.obj == undefined)

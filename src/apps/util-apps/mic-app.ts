@@ -1,5 +1,5 @@
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Microphone, Color, Circle3 } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Microphone, Color, Circle3, InputHandler } from "Geon";
 
 export class MicApp extends App {
 
@@ -47,8 +47,8 @@ export class MicApp extends App {
         this.grid.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.scene.camera.update(state);
+    update(input: InputHandler) {
+        this.scene.camera.update(input);
         if (!this.mic) return;
         let samples = this.mic.getTimeDomainDelayed();
 
@@ -61,7 +61,7 @@ export class MicApp extends App {
         }
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.grid.render(this.scene);
         this.debug.render(this.scene);
         for (let i = 0 ; i < 32; i++) {

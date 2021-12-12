@@ -1,5 +1,5 @@
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, ImageRenderer, BillboardShader, loadImageFromSrc, Bitmap as Texture, Domain2, Vector2, MultiVector2, BillboardPayload, DrawSpeed, UI, MultiLine, Plane, Vector3, InputState, Scene } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, ImageRenderer, BillboardShader, loadImageFromSrc, Bitmap as Texture, Domain2, Vector2, MultiVector2, BillboardPayload, DrawSpeed, UI, MultiLine, Plane, Vector3, InputState, Scene, InputHandler } from "Geon";
 
 export class BillboardApp extends App {
     // ui
@@ -66,13 +66,11 @@ export class BillboardApp extends App {
         this.gs.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
+    draw() {
         let c = new Scene(this.camera);
         this.gs.render(c);
         this.mr.render(c);

@@ -11,7 +11,7 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { AmbientMeshShader } from "Engine/render/shaders/AmbientMeshShader";
 import { ZebraShader } from "Engine/render/shaders/ZebraShader";
-import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Domain3, Entity } from "Geon";
+import { App, Camera, Plane, MultiLine, ShaderMesh, Parameter, EnumParameter, UI, Vector3, Mesh, InputState, Scene, DrawSpeed, Matrix4, Domain3, Entity, InputHandler } from "Geon";
 
 
 export class ZebraApp extends App {
@@ -111,23 +111,12 @@ export class ZebraApp extends App {
         this.lineRenderer.set(grid);
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.camera.update(state);
-
-        if (state.IsKeyPressed("k")){
-            console.log(this.camera.worldMatrix.inverse().multiplyVector(Vector3.new()));
-            
-            console.log(this.camera.pos);
-            console.log(this.camera.getState())
-            console.log(this.camera.offset);
-            
-            this.camera.worldMatrix.print();
-            this.camera.worldMatrix.inverse().print();
-        }
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         // this.phong.draw(this.scene);
         this.phong.draw(this.scene);
         this.lineRenderer.render(this.scene);

@@ -44,7 +44,7 @@
 //         }
 //     }
 
-//     update(state: InputState) {
+//     update(input: InputHandler) {
 //         for (let i = 0 ; i < this.recs.length; i++) {
 
 //             // these 'should' be pointers, but check this
@@ -71,7 +71,7 @@
 //         }
 //     }
 
-//     draw(gl: WebGLRenderingContext) {
+//     draw() {
 //         for (const rec of this.recs) {
 
 //             this.renderer.setAndRender(gl, rec, this.tex.toImageData());

@@ -1,7 +1,7 @@
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
-import { App, Parameter, Vector3, MultiLine, Plane, Bezier, Camera, UI, Circle3, DrawSpeed, InputState, Scene } from "Geon";
+import { App, Parameter, Vector3, MultiLine, Plane, Bezier, Camera, UI, Circle3, DrawSpeed, InputState, Scene, InputHandler } from "Geon";
 
 export class BezierCpApp extends App {
     // ui
@@ -92,14 +92,14 @@ export class BezierCpApp extends App {
         this.lrGrid.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
-        this.updateCursor(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
+        this.updateCursor(input);
     }
 
-    updateCursor(state: InputState) {
+    updateCursor(state: InputHandler) {
         // render mouse to world line
-        let ray = this.camera.getMouseWorldRay(state.canvas.width, state.canvas.height);
+        let ray = this.camera.getMouseWorldRay(state.width, state.height);
         let t = ray.xPlane(this.plane);
         this.point = ray.at(t);
         let lines = [];
@@ -113,9 +113,7 @@ export class BezierCpApp extends App {
         this.lrBlue.set(MultiLine.fromJoin(lines));
     }
 
-    draw(gl: WebGLRenderingContext) {
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
+    draw() {
         let c = new Scene(this.camera);
 
         this.lrGrid.render(c);

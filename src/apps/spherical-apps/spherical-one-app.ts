@@ -6,7 +6,7 @@ import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { Stopwatch } from "Engine/util/Stopwatch";
-import { App, Camera, Parameter, EnumParameter, Graph, ShaderMesh, UI, Mesh, Vector3, DrawSpeed, Matrix4, InputState, Scene } from "Geon";
+import { App, Camera, Parameter, EnumParameter, Graph, ShaderMesh, UI, Mesh, Vector3, DrawSpeed, Matrix4, InputState, Scene, InputHandler } from "Geon";
 import { quadification, averageEdgeLength, squarification, laPlacian } from "./spherical";
 
 export class SphericalOneApp extends App {
@@ -206,12 +206,12 @@ export class SphericalOneApp extends App {
         // console.log("loops: ", this.graph.allVertLoops());
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
 
-        if (!state.mouseRightDown && this.rotate.get() == 1) {
+        if (input.mouse?.rightDown && this.rotate.get() == 1) {
             // rotate
-            let alpha = 0.0001 * state.tick;
+            let alpha = 0.0001 * input.time.tick;
             let rot = Matrix4.newXRotation(alpha).multiply(Matrix4.newYRotation(alpha));
             this.graph.transform(rot);
         }
@@ -241,7 +241,7 @@ export class SphericalOneApp extends App {
         this.graphRend.set(this.graph, DrawSpeed.DynamicDraw);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         let c = new Scene(this.camera);
         this.meshRend.render(c);
         this.graphRend.render(c);

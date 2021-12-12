@@ -1,7 +1,7 @@
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
-import { App, Parameter, Vector3, MultiLine, Camera, UI, Domain3, Random, Spline, Circle3, Plane, DrawSpeed, InputState, Scene } from "Geon";
+import { App, Parameter, Vector3, MultiLine, Camera, UI, Domain3, Random, Spline, Circle3, Plane, DrawSpeed, InputState, Scene, InputHandler } from "Geon";
 
 export class SplineApp extends App {
     // ui
@@ -84,13 +84,11 @@ export class SplineApp extends App {
         this.lrGrid.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
+    draw() {
         let c = new Scene(this.camera);
 
         this.lrGrid.render(c);

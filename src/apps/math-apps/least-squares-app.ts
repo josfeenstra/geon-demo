@@ -6,7 +6,7 @@
 
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, Random, MultiVector3, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, Matrix4, InputState, Scene, Domain3, FloatMatrix, Stat } from "Geon";
+import { App, Parameter, Random, MultiVector3, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, Matrix4, InputState, Scene, Domain3, FloatMatrix, Stat, InputHandler } from "Geon";
 
 export class LeastSquaresApp extends App {
     // ui
@@ -180,15 +180,13 @@ export class LeastSquaresApp extends App {
         this.startGrid();
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.camera.update(state);
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         // get to-screen matrix
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
         let c = new Scene(this.camera);
 
         this.lineRenderer.render(c);

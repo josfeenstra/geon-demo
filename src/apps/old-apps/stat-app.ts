@@ -6,7 +6,7 @@
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { SimpleMeshShader } from "Engine/render/shaders-old/simple-mesh-shader";
-import { App, Camera, ShaderMesh, Vector3, MultiLine, FloatMatrix, Stat, InputState } from "Geon";
+import { App, Camera, ShaderMesh, Vector3, MultiLine, FloatMatrix, Stat, InputState, InputHandler } from "Geon";
 
 export class StatApp extends App {
     dotRenderer: DotShader;
@@ -47,14 +47,11 @@ export class StatApp extends App {
         console.log(Math.sqrt(1248), 20, Math.sqrt(384), 0, 0);
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.camera.update(state);
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
-        // get to-screen matrix
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
+    draw() {
     }
 }

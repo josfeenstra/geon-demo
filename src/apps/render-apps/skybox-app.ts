@@ -1,4 +1,4 @@
-import { App, Camera, DrawSpeed, InputState, LineShader, MultiLine, MultiVector3, Parameter, Plane, Scene, SkyBoxShader, UI, Vector3 } from "Geon";
+import { App, Camera, DrawSpeed, InputHandler, InputState, LineShader, MultiLine, MultiVector3, Parameter, Plane, Scene, SkyBoxShader, UI, Vector3 } from "Geon";
 
 export class SkyboxApp extends App {
     // ui
@@ -41,11 +41,11 @@ export class SkyboxApp extends App {
         this.gs.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         let c = new Scene(this.camera);
         this.gs.render(c);
         this.skyboxShader.draw(c);

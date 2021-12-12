@@ -2,7 +2,7 @@
 
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { TextureMeshShader } from "Engine/render/shaders-old/texture-mesh-shader";
-import { App, Parameter, UI, MultiVector3, Random, Camera, DebugRenderer, Domain3, Vector3, Bitmap as Texture, ImageMesh, Polyline, Plane, MultiLine, DrawSpeed, InputState, Scene } from "Geon";
+import { App, Parameter, UI, MultiVector3, Random, Camera, DebugRenderer, Domain3, Vector3, Bitmap as Texture, ImageMesh, Polyline, Plane, MultiLine, DrawSpeed, InputState, Scene, InputHandler } from "Geon";
 
 export class MultiRendererApp extends App {
     
@@ -82,15 +82,13 @@ export class MultiRendererApp extends App {
         this.gs.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
         this.points.forEach(v => v.add(Vector3.fromRandomUnit(this.rng)))        
         this.mr.set(this.points, "dots");
     }
 
-    draw(gl: WebGLRenderingContext) {
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
+    draw() {
         let scene = new Scene(this.camera);
         this.gs.render(scene);
         this.mr.render(scene);

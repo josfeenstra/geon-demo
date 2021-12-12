@@ -4,7 +4,7 @@
 
 import { NormalShader } from "Engine/render/shaders-old/mesh-normals-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene, PhongShader, Entity, Model, SkyBoxShader } from "Geon";
+import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene, PhongShader, Entity, Model, SkyBoxShader, InputHandler } from "Geon";
 
 
 export class IcosahedronApp extends App {
@@ -122,11 +122,11 @@ export class IcosahedronApp extends App {
             "./data/textures/corona_lf.png"]);
     }
 
-    update(state: InputState) {
-        this.scene.camera.update(state);
+    update(input: InputHandler) {
+        this.scene.camera.update(input);
 
-        if (!state.mouseRightDown && this.rotate.get() == 1) {
-            let alpha = 0.0002 * state.tick;
+        if (this.rotate.get() == 1) {
+            let alpha = 0.0002 * input.time.tick;
             let rot = Matrix4.newXRotation(alpha).multiply(Matrix4.newYRotation(alpha));
             this.isocahedron!.position.multiply(rot);
 
@@ -134,7 +134,7 @@ export class IcosahedronApp extends App {
         }
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         
         this.meshRend.draw(this.scene);
         this.skyboxShader.draw(this.scene);

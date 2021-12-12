@@ -1,7 +1,7 @@
 // NOTE: splines are not nearly efficient enough for this kind of business :).
 
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, Perlin, MultiVector3, Camera, DotShaderWithHeight, Random, UI, Domain2, Vector3, DrawSpeed, MultiLine, Plane, InputState, Spline, Scene } from "Geon";
+import { App, Parameter, Perlin, MultiVector3, Camera, DotShaderWithHeight, Random, UI, Domain2, Vector3, DrawSpeed, MultiLine, Plane, InputState, Spline, Scene, InputHandler } from "Geon";
 
 
 export class PerlinLinesApp extends App {
@@ -75,8 +75,8 @@ export class PerlinLinesApp extends App {
         this.lrGrid.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
 
         let perlinMove = this.params[2].get() == 1;
         if (perlinMove) {
@@ -85,7 +85,7 @@ export class PerlinLinesApp extends App {
             let news = MultiVector3.new(this.dots.count);
             for (let i = 0; i < this.dots.count; i++) {
                 let v = this.dots.get(i);
-                let n = this.perlin.noise(v.x, v.y, state.newTime * 0.0001 * speed) * factor;
+                let n = this.perlin.noise(v.x, v.y, input.time.newTime * 0.0001 * speed) * factor;
                 v.z = n;
                 news.set(i, v);
             }
@@ -103,7 +103,7 @@ export class PerlinLinesApp extends App {
         }
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         let c = new Scene(this.camera);
 
         this.drRed.draw(c);

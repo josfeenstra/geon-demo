@@ -6,7 +6,7 @@
 
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, Random, MultiVector3, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, Matrix4, InputState, Scene, Domain3, FloatMatrix, Stat, DebugRenderer, MultiVector2 } from "Geon";
+import { App, Parameter, Random, MultiVector3, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, Matrix4, InputState, Scene, Domain3, FloatMatrix, Stat, DebugRenderer, MultiVector2, InputHandler } from "Geon";
 
 export class PointClickApp extends App {
     // ui
@@ -54,11 +54,11 @@ export class PointClickApp extends App {
         this.startGrid();
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.scene.camera.update(state);
+        this.scene.camera.update(input);
 
-        if (state.mouseLeftPressed) {
+        if (input.mouse?.leftPressed) {
             let ray = this.scene.camera.getMouseWorldRay(this.gl.canvas.width, this.gl.canvas.height, true);
             let point = ray.at(ray.xPlane(Plane.WorldXY()));
             this.points.push(point);
@@ -67,7 +67,7 @@ export class PointClickApp extends App {
         
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.omni.render(this.scene);
         this.ds.render(this.scene);
     }

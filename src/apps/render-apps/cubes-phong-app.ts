@@ -10,7 +10,7 @@ import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
 import { DepthMeshShader } from "Engine/render/shaders/DepthMeshShader"
-import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3, DebugRenderer, DrawSpeed, Entity } from "Geon";
+import { App, Camera, Plane, MultiLine, Vector3, ShaderMesh, IntCube, Parameter, UI, InputState, Scene, Mesh, Ray, Matrix4, Cube, Domain3, DebugRenderer, DrawSpeed, Entity, InputHandler, Key } from "Geon";
 
 export class CubesPhongApp extends App {
     // renderinfo
@@ -100,16 +100,14 @@ export class CubesPhongApp extends App {
         });
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.scene.camera.update(state);
+        this.scene.camera.update(input);
         this.scene.sun.pos = this.scene.camera.getActualPosition();
-        this.updateCursor(state);
+        this.updateCursor(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
-        // get to-screen matrix
-        const canvas = gl.canvas as HTMLCanvasElement;
+    draw() {
 
         // render the grid
         // this.greyLineRenderer.render(gl, matrix);
@@ -136,9 +134,9 @@ export class CubesPhongApp extends App {
         this.geo = [];
     }
 
-    updateCursor(state: InputState) {
+    updateCursor(input: InputHandler) {
         // render mouse to world line
-        let mouseRay = this.scene.camera.getMouseWorldRay(state.canvas.width, state.canvas.height);
+        let mouseRay = this.scene.camera.getMouseWorldRay(input.width, input.height);
 
         // snap to world
         // let cursor = mouseRay.at(mouseRay.xPlane(this.plane));
@@ -166,9 +164,9 @@ export class CubesPhongApp extends App {
         // this.geo.push(Mesh.fromCube(cube));
 
         // click
-        if (state.mouseLeftPressed) {
+        if (input.mouse?.leftPressed || (input.touch && input.touch.down > 1)) {
             console.log("click");
-            if (state.IsKeyDown(" ")) {
+            if (input.keys?.isDown(Key.Space)) {
                 if (this.map.data[cubeID] == 0) return;
                 this.map.data[cubeID] = 0;
                 this.bufferMap();

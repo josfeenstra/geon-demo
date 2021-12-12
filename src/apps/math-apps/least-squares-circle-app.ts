@@ -7,7 +7,7 @@
 import { LSA } from "Engine/math/LSA";
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
-import { App, Parameter, Random, MultiVector3, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, Matrix4, InputState, Scene, Domain3, FloatMatrix, Stat, DebugRenderer, MultiVector2, Circle2, Vector2, Circle3, Domain2 } from "Geon";
+import { App, Parameter, Random, MultiVector3, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, Matrix4, InputState, Scene, Domain3, FloatMatrix, Stat, DebugRenderer, MultiVector2, Circle2, Vector2, Circle3, Domain2, InputHandler } from "Geon";
 
 export class LeastSquaresCircleApp extends App {
     // ui
@@ -68,11 +68,11 @@ export class LeastSquaresCircleApp extends App {
         this.lsa(useOutlierRemoval, maxError);
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.scene.camera.update(state);
+        this.scene.camera.update(input);
 
-        if (state.mouseLeftPressed) {
+        if (input.mouse?.leftDown || (input.touch && input.touch.down > 0)) {
             let ray = this.scene.camera.getMouseWorldRay(this.gl.canvas.width, this.gl.canvas.height, true);
             let point = ray.at(ray.xPlane(Plane.WorldXY()));
             this.points.push(point);
@@ -81,7 +81,7 @@ export class LeastSquaresCircleApp extends App {
         
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.omni.render(this.scene);
         this.ds.render(this.scene);
         this.dsYellow.render(this.scene);

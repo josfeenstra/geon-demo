@@ -6,7 +6,7 @@
 import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Parameter, Graph, ShaderMesh, Camera, IntMatrix, UI, InputState, Matrix4, Vector3, Scene, DrawSpeed } from "Geon";
+import { App, Parameter, Graph, ShaderMesh, Camera, IntMatrix, UI, InputState, Matrix4, Vector3, Scene, DrawSpeed, InputHandler } from "Geon";
 import { createGraph, createTileWorld, averageEdgeLength, meshifyTileWorld, meshifyGraphSurface, squarification, laPlacian } from "./spherical";
 
 //
@@ -97,14 +97,14 @@ export class SphericalThreeApp extends App {
         this.bufferWorld();
     }
 
-    update(state: InputState) {
-        this.camera.update(state);
+    update(input: InputHandler) {
+        this.camera.update(input);
 
-        let pulse = Math.sin(state.newTime);
+        let pulse = Math.sin(input.time.newTime);
 
         // rotate
         if (this.rotate.get() == 1) {
-            let rot = Matrix4.newAxisRotation(Vector3.unitZ(), state.tick * 0.0001);
+            let rot = Matrix4.newAxisRotation(Vector3.unitZ(), input.time.tick * 0.0001);
             this.world.position.multiply(rot);
             this.worldFloor.position.multiply(rot);
             this.meshRend.setShallow(this.gl, this.world);
@@ -114,7 +114,7 @@ export class SphericalThreeApp extends App {
         this.smoothWorld();
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         let c = new Scene(this.camera);
         this.meshRend.setShallow(this.gl, this.world);
         this.meshRend.render(c);

@@ -1,4 +1,4 @@
-import { App, Scene, DebugRenderer, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, LineShader } from "Geon";
+import { App, Scene, DebugRenderer, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, LineShader, InputHandler } from "Geon";
 
 export class TemplateApp extends App {
 
@@ -35,12 +35,12 @@ export class TemplateApp extends App {
         this.grid.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
-        this.scene.camera.update(state);
+    update(input: InputHandler) {
+        this.scene.camera.update(input);
         // update state | fill up shaders
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.grid.render(this.scene);
         this.debug.render(this.scene);
     }

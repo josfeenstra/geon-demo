@@ -1,4 +1,4 @@
-import { App, Scene, DebugRenderer, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, LineShader, Bitmap, Color, COLOR, ImageMesh, Vector2, Util, Time } from "Geon";
+import { App, Scene, DebugRenderer, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, LineShader, Bitmap, Color, COLOR, ImageMesh, Vector2, Util, Time, InputHandler } from "Geon";
 import { TileSolver } from "Engine/algorithms/TileSolver";
 import { TileAtlas } from "Engine/algorithms/TileAtlas";
 
@@ -164,12 +164,12 @@ export class WaveApp extends App {
         this.grid.set(grid, DrawSpeed.StaticDraw);
     }
 
-    update(state: InputState) {
+    update(state: InputHandler) {
         this.scene.camera.update(state);
         // update state | fill up shaders
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.grid.render(this.scene);
         this.debug.render(this.scene);
     }

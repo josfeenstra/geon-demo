@@ -4,7 +4,7 @@
 // purpose : test with Renderers, Domains & Vectors
 
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
-import { App, Vector3, Domain3, Camera, Random, InputState, Scene, Matrix4 } from "Geon";
+import { App, Vector3, Domain3, Camera, Random, InputState, Scene, Matrix4, InputHandler } from "Geon";
 
 export class DotApp3 extends App {
     dots: Vector3[] = [];
@@ -47,11 +47,11 @@ export class DotApp3 extends App {
         }
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.camera.update(state);
+        this.camera.update(input);
 
-        if (state.mouseLeftPressed) {
+        if (input.mouse?.leftPressed || input.touch?.tab) {
             this.spawnSome(100, 0.001);
         }
 
@@ -71,10 +71,8 @@ export class DotApp3 extends App {
         }
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         // get to-screen matrix
-        const canvas = gl.canvas as HTMLCanvasElement;
-        let matrix = this.camera.totalMatrix;
         let c = new Scene(this.camera);
 
         // render the corners of the box with the red renderer,

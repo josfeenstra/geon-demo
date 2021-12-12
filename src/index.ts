@@ -71,7 +71,7 @@ function main() {
         LoftApp,
         SphericalApp,
         SphericalThreeApp,
-        SphericalTwoApp,
+        // SphericalTwoApp, // I broke this...
         SphericalOneApp,
         IcosahedronApp,
         DotApp3,

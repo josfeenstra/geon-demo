@@ -3,7 +3,7 @@
 // author : Jos Feenstra
 // purpose : test with Renderers, Domains & Vectors
 
-import { App, ImageRenderer, Camera, UI, Bitmap, InputState, Scene } from "Geon";
+import { App, ImageRenderer, Camera, UI, Bitmap, InputState, Scene, InputHandler } from "Geon";
 
 export class UITestApp extends App {
     context: Scene;
@@ -30,15 +30,12 @@ export class UITestApp extends App {
         this.images.buffer();
     }
 
-    update(state: InputState) {
+    update(input: InputHandler) {
         // move the camera with the mouse
-        this.context.camera.update(state);
-
-        if (state.mouseLeftPressed) {
-        }
+        this.context.camera.update(input);
     }
 
-    draw(gl: WebGLRenderingContext) {
+    draw() {
         this.images.render(this.context);
     }
 }
