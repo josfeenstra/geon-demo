@@ -164,7 +164,7 @@ export class CubesPhongApp extends App {
         // this.geo.push(Mesh.fromCube(cube));
 
         // click
-        if (input.mouse?.leftPressed || (input.touch && input.touch.down > 1)) {
+        if (input.mouse?.leftPressed || input.touch?.tab) {
             console.log("click");
             if (input.keys?.isDown(Key.Space)) {
                 if (this.map.data[cubeID] == 0) return;

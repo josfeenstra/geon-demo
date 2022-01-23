@@ -6,7 +6,7 @@ import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { Stopwatch } from "Engine/util/Stopwatch";
-import { App, Camera, Parameter, EnumParameter, Graph, ShaderMesh, UI, Mesh, Vector3, DrawSpeed, Matrix4, InputState, Scene, InputHandler } from "Geon";
+import { App, Camera, Parameter, EnumParameter, Graph, ShaderMesh, UI, Mesh, Vector3, DrawSpeed, Matrix4, InputState, Scene, InputHandler, Random } from "Geon";
 import { quadification, averageEdgeLength, squarification, laPlacian } from "./spherical";
 
 export class SphericalOneApp extends App {
@@ -113,8 +113,9 @@ export class SphericalOneApp extends App {
         console.log("subdivision in ", stopwatch.time(), "ms");
 
         // 2 | remove random edges
+        let random = Random.fromSeed(19384);
         if (this.randomEdges.get() == 1) {
-            quadification(graph);
+            quadification(graph, random);
 
             // graph.print();
             // 2 | remove random edges

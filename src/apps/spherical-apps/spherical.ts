@@ -1,9 +1,9 @@
-import { EdgeIndex, Graph, IntMatrix, Mesh, Plane, ShaderMesh, Vector3 } from "Geon";
+import { EdgeIndex, Graph, IntMatrix, Mesh, Plane, Random, ShaderMesh, Vector3 } from "Geon";
 
 
 export namespace Spherical {
 
-    export function createSphere(liftType=1, subCount=2, quadSubCount=1, randomEdges=true, smooth=true) {
+    export function createSphere(liftType=1, subCount=2, quadSubCount=1, randomEdges=true, smooth=true, random: Random) {
     
         // 0 | setup
         const mesh = Mesh.newIcosahedron(0.5);
@@ -42,7 +42,7 @@ export namespace Spherical {
     
         // 2 | remove random edges
         if (randomEdges) {
-            quadification(graph);
+            quadification(graph, random);
     
             // graph.print();
             // 2 | remove random edges
@@ -102,6 +102,7 @@ export function createGraph(
     subcount: number,
     quadsubcount: number,
     randomEdges: number,
+    random: Random,
 ): Graph {
     // 0 | setup
     const mesh = Mesh.newIcosahedron(0.5);
@@ -133,7 +134,7 @@ export function createGraph(
 
     // 2 | remove random edges
     if (randomEdges == 1) {
-        quadification(graph);
+        quadification(graph, random);
     }
 
     // 3 | subdivide quad
@@ -442,7 +443,7 @@ export function squarification(graph: Graph, centerCornerAverage?: number) {
     return cca;
 }
 
-export function quadification(graph: Graph) {
+export function quadification(graph: Graph, random: Random) {
     // edge deletion heuristic:
     // remove edges between two triangles to create a quad.
     // keep removing edges until no triangle neighbors another triangle.
@@ -459,7 +460,7 @@ export function quadification(graph: Graph) {
 
     // shuffle
     let shuffler = (a: any, b: any) => {
-        return 0.5 - Math.random();
+        return 0.5 - random.get();
     };
     edgeIds.sort(shuffler);
 

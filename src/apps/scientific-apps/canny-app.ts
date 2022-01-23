@@ -3,6 +3,7 @@ import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Pla
 // const PATHS_TO_TEXTURE = ["./data/eyes/eyes-1.jpeg", "./data/eyes/eyes-2.jpeg","./data/eyes/eyes-3.jpeg"];
 
 const PATHS_TO_TEXTURE = [
+    "./data/textures/earth.png",
     "./data/textures/prague-darker.png",
     "./data/textures/prague.png",
     "./data/textures/prague-lighter.png"

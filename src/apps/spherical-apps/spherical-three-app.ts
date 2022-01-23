@@ -6,7 +6,7 @@
 import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Parameter, Graph, ShaderMesh, Camera, IntMatrix, UI, InputState, Matrix4, Vector3, Scene, DrawSpeed, InputHandler } from "Geon";
+import { App, Parameter, Graph, ShaderMesh, Camera, IntMatrix, UI, InputState, Matrix4, Vector3, Scene, DrawSpeed, InputHandler, Random } from "Geon";
 import { createGraph, createTileWorld, averageEdgeLength, meshifyTileWorld, meshifyGraphSurface, squarification, laPlacian } from "./spherical";
 
 //
@@ -79,11 +79,13 @@ export class SphericalThreeApp extends App {
         this.smoothlimit = 0;
 
         // create the graph
+        let random = Random.fromSeed(194845);
         this.graph = createGraph(
             1,
             this.subCount.get(),
             this.quadSubCount.get(),
             this.randomEdges.get(),
+            random
         );
 
         // create the tile data

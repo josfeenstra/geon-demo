@@ -72,7 +72,7 @@ export class LeastSquaresCircleApp extends App {
         // move the camera with the mouse
         this.scene.camera.update(input);
 
-        if (input.mouse?.leftDown || (input.touch && input.touch.down > 0)) {
+        if (input.mouse?.leftDown || input.touch?.tab) {
             let ray = this.scene.camera.getMouseWorldRay(this.gl.canvas.width, this.gl.canvas.height, true);
             let point = ray.at(ray.xPlane(Plane.WorldXY()));
             this.points.push(point);

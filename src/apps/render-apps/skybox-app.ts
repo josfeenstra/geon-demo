@@ -26,12 +26,19 @@ export class SkyboxApp extends App {
     start() {
         this.startGrid();
         this.skyboxShader.load([
-            "./data/textures/corona_ft.png", 
-            "./data/textures/corona_bk.png", 
-            "./data/textures/corona_up.png", 
-            "./data/textures/corona_dn.png", 
-            "./data/textures/corona_rt.png", 
-            "./data/textures/corona_lf.png"]);
+            "./data/textures/ducks/rechts.png", 
+            "./data/textures/ducks/links.png", 
+            "./data/textures/ducks/midden-1.png", 
+            "./data/textures/ducks/midden-3.png", 
+            "./data/textures/ducks/midden-2.png", 
+            "./data/textures/ducks/midden-4.png"]);
+        // this.skyboxShader.load([
+        //     "./data/textures/corona_ft.png", 
+        //     "./data/textures/corona_bk.png", 
+        //     "./data/textures/corona_up.png", 
+        //     "./data/textures/corona_dn.png", 
+        //     "./data/textures/corona_rt.png", 
+        //     "./data/textures/corona_lf.png"]);
     }
 
     ui(ui: UI) {}

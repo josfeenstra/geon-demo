@@ -6,7 +6,7 @@
 import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Parameter, Graph, ShaderMesh, Camera, IntMatrix, UI, InputState, Matrix4, Vector3, Scene, DrawSpeed, SkyBoxShader, PhongShader, Entity, Model, Material, InputHandler } from "Geon";
+import { App, Parameter, Graph, ShaderMesh, Camera, IntMatrix, UI, InputState, Matrix4, Vector3, Scene, DrawSpeed, SkyBoxShader, PhongShader, Entity, Model, Material, InputHandler, Random } from "Geon";
 import { createGraph, createTileWorld, averageEdgeLength, meshifyTileWorld, meshifyGraphSurface, squarification, laPlacian } from "./spherical";
 
 //
@@ -38,9 +38,9 @@ export class SphericalApp extends App {
     graphRend: GraphDebugShader;
 
     tiles!: IntMatrix;
-    skybox: SkyBoxShader;
     scene: Scene;
     newMeshShader: PhongShader;
+    skyboxShader: SkyBoxShader;
 
     constructor(gl: WebGLRenderingContext) {
         super(gl, "Multiple Layers of spherical geometry");
@@ -54,10 +54,10 @@ export class SphericalApp extends App {
         // this.meshRend = new MeshDebugRenderer(gl, [0, 0, 0, 1], [0.3, 0.3, 0.3, 1], false);
         this.debugRend = new MeshDebugShader(gl, [0.5, 0, 0, 1], [0, 0, 0, 1], false);
         this.graphRend = new GraphDebugShader(gl, [0.5, 0.5, 0.5, 1], [1, 1, 1, 1]);
-        this.skybox = new SkyBoxShader(gl);
         this.scene =  new Scene(this.camera);
 
         this.newMeshShader = new PhongShader(gl);
+        this.skyboxShader = new SkyBoxShader(gl);
     }
 
     ui(ui: UI) {
@@ -86,11 +86,13 @@ export class SphericalApp extends App {
         this.smoothlimit = 0;
 
         // create the graph
+        let random = Random.fromSeed(13894);
         this.graph = createGraph(
             1,
             this.subCount.get(),
             this.quadSubCount.get(),
             this.randomEdges.get(),
+            random
         );
 
         // create the tile data
@@ -110,6 +112,15 @@ export class SphericalApp extends App {
 
         // buffer
         this.bufferWorld();
+
+
+        this.skyboxShader.load([
+            "./data/textures/ducks/links.png", 
+            "./data/textures/ducks/rechts.png", 
+            "./data/textures/ducks/midden-1.png", 
+            "./data/textures/ducks/midden-3.png", 
+            "./data/textures/ducks/midden-2.png", 
+            "./data/textures/ducks/midden-4.png"]);
     }
 
     update(input: InputHandler) {
@@ -132,9 +143,9 @@ export class SphericalApp extends App {
     }
 
     draw() {
+        this.skyboxShader.draw(this.scene);
         this.floorRend.render(this.scene);
         this.newMeshShader.draw(this.scene);
-        this.skybox.draw(this.scene);
     }
 
     bufferWorld() {

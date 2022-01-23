@@ -2,7 +2,7 @@
 
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
-import { App, Parameter, EnumParameter, Graph, ShaderMesh, Scene, Camera, UI, Mesh, Vector3, DrawSpeed, InputState, Matrix4, InputHandler } from "Geon";
+import { App, Parameter, EnumParameter, Graph, ShaderMesh, Scene, Camera, UI, Mesh, Vector3, DrawSpeed, InputState, Matrix4, InputHandler, Random } from "Geon";
 import { quadification, averageEdgeLength, constructMeshFromSphereGraph, squarification, laPlacian } from "./spherical";
 
 
@@ -104,8 +104,9 @@ export class SphericalTwoApp extends App {
         }
 
         // 2 | remove random edges
+        let random = Random.fromSeed(494843);
         if (this.randomEdges.get() == 1) {
-            quadification(graph);
+            quadification(graph, random);
         }
 
         // 3 | subdivide quad
