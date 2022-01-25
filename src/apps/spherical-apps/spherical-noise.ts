@@ -6,28 +6,30 @@ import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
 import { Stopwatch } from "Engine/util/Stopwatch";
-import { App, Camera, Parameter, EnumParameter, Graph, ShaderMesh, UI, Mesh, Vector3, DrawSpeed, Matrix4, InputState, Scene, InputHandler, Random, Perlin, PhongShader, Entity, Model, Material } from "Geon";
+import { App, Camera, Parameter, EnumParameter, Graph, ShaderMesh, UI, Mesh, Vector3, DrawSpeed, Matrix4, InputState, Scene, InputHandler, Random, Perlin, PhongShader, Entity, Model, Material, Cube, Plane, Key } from "Geon";
 import { quadification, averageEdgeLength, squarification, laPlacian } from "./spherical";
 
 export class SphericalNoise extends App {
+    
     camera: Camera;
     meshRend: ShadedMeshShader;
     debugRend: MeshDebugShader;
     graphRend: GraphDebugShader;
     phong: PhongShader;
+    entityShader: PhongShader;
 
     rotate!: Parameter;
     inner!: Parameter;
     subCount!: Parameter;
     liftType!: EnumParameter;
     randomEdges!: Parameter;
-    noise!: Parameter;
+    noiseScale!: Parameter;
 
     offset!: Parameter;
-    tinus!: Parameter;
-    sjakie!: Parameter;
-    jaapiejo!: Parameter;
-    kaasheer!: Parameter;
+    amplitude!: Parameter;
+    noiseOctaves!: Parameter;
+    noiseOctaveBlend!: Parameter;
+    noiseStride!: Parameter;
 
     radius = 0.1;
 
@@ -38,19 +40,22 @@ export class SphericalNoise extends App {
     smoothlimit = 0;
     cca?: number;
 
+    entity!: Entity;
+
     constructor(gl: WebGLRenderingContext) {
         super(
             gl,
             "setup for trying out different partitions of a sphere. Based on Oskar Stalberg's irregular quad grid",
         );
         let canvas = gl.canvas as HTMLCanvasElement;
-        this.camera = new Camera(canvas, 1, true);
+        this.camera = new Camera(canvas, 1, false, true);
         this.camera.set(-4.48, 1.24, -0.71);
 
         this.meshRend = new ShadedMeshShader(gl);
         this.debugRend = new MeshDebugShader(gl, [0.5, 0, 0, 1], [1, 0, 0, 1], false);
         this.graphRend = new GraphDebugShader(gl, [0.5, 0, 0, 1], [255 / 255, 69 / 255, 0, 1]);
         this.phong = new PhongShader(gl);
+        this.entityShader = new PhongShader(gl);
     }
 
     ui(ui: UI) {
@@ -62,34 +67,40 @@ export class SphericalNoise extends App {
         this.rotate = new Parameter("rotate", 0, 0, 1, 1);
         this.randomEdges = new Parameter("randomEdges", 1, 0, 1, 1);
         this.smooth = new Parameter("smooth", 0, 0, 1, 1);
-        this.subCount = new Parameter("sub count", 5, 0, 5, 1);
+        this.subCount = new Parameter("sub count", 5, 0, 4, 1);
         this.liftType = EnumParameter.new("lift type", 1, ["none", "sphere", "buggy"]);
         
-        this.noise = new Parameter("noise", 1, 0, 10, 0.1);
-        
-        this.offset = new Parameter("offset", 1, 0, 1, 0.001);  
-        this.tinus = new Parameter("tinus", 1, 0, 5, 0.1);  
-        this.sjakie = new Parameter("sjakie", 1, 0, 10, 1);
-        this.jaapiejo = new Parameter("jaapiejo", 0.5, 0.0, 1.0, 0.01);
-        this.kaasheer = new Parameter("kaasheer", 0.06, 0, 1, 0.01);
+        this.noiseScale = new Parameter("noise scale", 1, 0, 10, 0.1);
+        this.offset = new Parameter("noise offset", 1, 0, 1, 0.001);  
+        this.amplitude = new Parameter("noise applitude", 1, 0, 5, 0.1);  
+        this.noiseOctaves = new Parameter("noise octaves", 1, 0, 10, 1);
+        this.noiseOctaveBlend = new Parameter("noise octaves blend", 0.5, 0.0, 1.0, 0.01);
+        this.noiseStride = new Parameter("noise stride", 0.06, 0, 1, 0.01);
 
-        ui.addBooleanParameter(this.rotate);
-        ui.addBooleanParameter(this.randomEdges, reset);
-        ui.addBooleanParameter(this.smooth);
         ui.addParameter(this.subCount, reset);
         ui.addParameter(this.liftType, reset);
         
         ui.addParameter(this.offset, reset);
-        ui.addParameter(this.noise, reset);
-        ui.addParameter(this.tinus, reset);
-        ui.addParameter(this.sjakie, reset);
-        ui.addParameter(this.jaapiejo, reset);
-        ui.addParameter(this.kaasheer, reset);
+        ui.addParameter(this.noiseScale, reset);
+        ui.addParameter(this.amplitude, reset);
+        ui.addParameter(this.noiseOctaves, reset);
+        ui.addParameter(this.noiseOctaveBlend, reset);
+        ui.addParameter(this.noiseStride, reset);
 
         ui.addButton("recalculate", reset);
     }
 
+    startEntity() {
+
+        let model = new Model(Mesh.fromCube(Cube.fromRadius(Vector3.zero(), 0.05)), Material.default())
+        let e = new Entity(Matrix4.newTranslate(Vector3.new(0,0,1.3)), model);
+        this.entity = e;
+        this.entityShader.load(e);
+    }
+
     start() {
+        this.startEntity();
+
         let liftType = this.liftType.get();
 
         // 0 | setup
@@ -135,10 +146,10 @@ export class SphericalNoise extends App {
         for (let i = 0 ; i < this.graph.verts.length; i++) {
             let v = this.graph.verts[i].pos;
             let o = this.offset.get();
-            let noise = perlin.octaveNoise(v.x*this.noise.get() + o,v.y*this.noise.get() + 0,v.z*this.noise.get() + o, this.sjakie.get(), this.jaapiejo.get());
-            let parts = 1 / this.kaasheer.get();
+            let noise = perlin.octaveNoise(v.x*this.noiseScale.get() + o,v.y*this.noiseScale.get() + 0,v.z*this.noiseScale.get() + o, this.noiseOctaves.get(), this.noiseOctaveBlend.get());
+            let parts = 1 / this.noiseStride.get();
             let rounded = Math.round(noise * parts) / parts;   
-            v.add(v.scaled(rounded * this.tinus.get())); 
+            v.add(v.scaled(rounded * this.amplitude.get())); 
         }
         let theMesh = this.graph.meshify();
         theMesh.calcAndSetVertexNormals();
@@ -150,6 +161,36 @@ export class SphericalNoise extends App {
 
     update(input: InputHandler) {
         this.camera.update(input);
+        this.updateEntity(input);
+    }
+    
+    entityVelocity = 0.01;
+    entityDirection = Vector3.unitX().scale(this.entityVelocity);
+
+    updateEntity(input: InputHandler) {
+        let lockedHeight = 1.3;
+        
+        // update position
+        let pos = this.entity.position.position;
+        let newPos = pos.add(this.entityDirection).setLength(lockedHeight);
+
+        // get new entityDirection
+        let cross = newPos.cross(this.entityDirection);
+        this.entityDirection = newPos.cross(cross).setLength(-this.entityVelocity);
+
+        // create plane
+        let plane = Plane.fromPVV(newPos, this.entityDirection.normalized(), cross.normalized());        
+
+        // rotate based upon input
+        if (input.keys?.isDown(Key.LeftArrow)) {
+            this.entityDirection = this.entityDirection.rotated(newPos, 0.05);
+        }
+        if (input.keys?.isDown(Key.RightArrow)) {
+            this.entityDirection = this.entityDirection.rotated(newPos, -0.05);
+        } 
+
+        this.entity.position = plane.matrix;
+        this.entityShader.loadPosition(this.entity.position);
     }
 
     draw() {
@@ -158,5 +199,6 @@ export class SphericalNoise extends App {
         this.graphRend.render(c);
         this.debugRend.render(c);
         this.phong.draw(c);
+        this.entityShader.draw(c);
     }
 }
