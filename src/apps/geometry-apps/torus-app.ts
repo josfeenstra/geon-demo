@@ -55,10 +55,12 @@ export class TorusApp extends App {
         this.gs.set(grid, DrawSpeed.StaticDraw);
     }
 
+    r = 0;
+
     update(input: InputHandler) {
         this.scene.camera.update(input);
-        let r = 0.0005 * input.time.tick;
-        this.entity.xform.rot.add(Quaternion.fromEuler(r, -r, r));
+        this.r += 0.0005 * input.time.tick;
+        this.entity.xform.rot.setEuler(this.r, -this.r, this.r);
         this.ps.loadTransform(this.entity.xform);
     }
 

@@ -122,14 +122,16 @@ export class IcosahedronApp extends App {
             "./data/textures/corona_lf.png"]);
     }
 
+    alpha = 0;
+
     update(input: InputHandler) {
         this.scene.camera.update(input);
 
         if (this.rotate.get() == 1) {
-            let alpha = 0.0002 * input.time.tick;
+            this.alpha += 0.0002 * input.time.tick;
             // let rot = Matrix4.newXRotation(alpha).multiply(Matrix4.newYRotation(alpha));
             // this.isocahedron!.xform.rot.multiply(rot);
-            this.isocahedron!.xform.rot.add(Quaternion.fromEuler(alpha, alpha, 0));
+            this.isocahedron!.xform.rot.setEuler(this.alpha, this.alpha, 0);
             this.meshRend.loadTransform(this.isocahedron.xform);
         }
     }
