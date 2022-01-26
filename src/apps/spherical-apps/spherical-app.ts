@@ -136,7 +136,7 @@ export class SphericalApp extends App {
             // this.meshRend.setShallow(this.gl, this.world);
             this.floorRend.setShallow(this.gl, this.worldFloor);
 
-            this.newMeshShader.loadPosition(this.world.position);
+            this.newMeshShader.loadTransform(this.world.position.toTransform());
         }
 
         this.smoothWorld();

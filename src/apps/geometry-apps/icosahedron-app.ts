@@ -4,7 +4,7 @@
 
 import { NormalShader } from "Engine/render/shaders-old/mesh-normals-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
-import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene, PhongShader, Entity, Model, SkyBoxShader, InputHandler } from "Geon";
+import { App, Camera, Parameter, Graph, ShaderMesh, Mesh, Vector3, UI, InputState, Matrix4, DrawSpeed, Scene, PhongShader, Entity, Model, SkyBoxShader, InputHandler, Quaternion } from "Geon";
 
 
 export class IcosahedronApp extends App {
@@ -127,10 +127,10 @@ export class IcosahedronApp extends App {
 
         if (this.rotate.get() == 1) {
             let alpha = 0.0002 * input.time.tick;
-            let rot = Matrix4.newXRotation(alpha).multiply(Matrix4.newYRotation(alpha));
-            this.isocahedron!.position.multiply(rot);
-
-            this.meshRend.loadPosition(this.isocahedron.position);
+            // let rot = Matrix4.newXRotation(alpha).multiply(Matrix4.newYRotation(alpha));
+            // this.isocahedron!.xform.rot.multiply(rot);
+            this.isocahedron!.xform.rot.add(Quaternion.fromEuler(alpha, alpha, 0));
+            this.meshRend.loadTransform(this.isocahedron.xform);
         }
     }
 

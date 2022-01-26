@@ -2,6 +2,7 @@
 // - improve quadification: less triangles!
 // - improve squarification: speed & equal sizes
 
+import { Transform } from "Engine/math/Transform";
 import { GraphDebugShader } from "Engine/render/shaders-old/graph-debug-shader";
 import { MeshDebugShader } from "Engine/render/shaders-old/mesh-debug-shader";
 import { ShadedMeshShader } from "Engine/render/shaders-old/shaded-mesh-shader";
@@ -93,13 +94,15 @@ export class SphericalNoise extends App {
     startEntity() {
 
         let model = new Model(Mesh.fromCube(Cube.fromRadius(Vector3.zero(), 0.05)), Material.default())
-        let e = new Entity(Matrix4.newTranslate(Vector3.new(0,0,1.3)), model);
+        let e = new Entity(Transform.new(Vector3.new(0,0,1.3)), model);
         this.entity = e;
         this.entityShader.load(e);
     }
 
     start() {
         this.startEntity();
+
+        this.quatTest();
 
         let liftType = this.liftType.get();
 
@@ -154,10 +157,20 @@ export class SphericalNoise extends App {
         let theMesh = this.graph.meshify();
         theMesh.calcAndSetVertexNormals();
         // this.debugRend.set(theMesh, DrawSpeed.StaticDraw)
-        this.phong.load(Entity.new(Matrix4.new(), Model.new(theMesh, Material.newPurple())))
+        this.phong.load(Entity.new(Transform.new(), Model.new(theMesh, Material.newPurple())))
         // console.log("edges: ", this.graph.allEdges());
         // console.log("loops: ", this.graph.allVertLoops());
     }
+
+
+    quatTest() {
+        let xform = this.entity.xform;
+        console.log(xform);
+        let m = xform.toMatrix();
+        let xform2 = m.toTransform();
+        console.log(xform2);
+    }
+
 
     update(input: InputHandler) {
         this.camera.update(input);
@@ -171,7 +184,7 @@ export class SphericalNoise extends App {
         let lockedHeight = 1.3;
         
         // update position
-        let pos = this.entity.position.position;
+        let pos = this.entity.xform.pos;
         let newPos = pos.add(this.entityDirection).setLength(lockedHeight);
 
         // get new entityDirection
@@ -189,8 +202,12 @@ export class SphericalNoise extends App {
             this.entityDirection = this.entityDirection.rotated(newPos, -0.05);
         } 
 
-        this.entity.position = plane.matrix;
-        this.entityShader.loadPosition(this.entity.position);
+        if (input.keys?.isPressed(Key.Space)) {
+            this.quatTest();
+        }
+
+        // this.entity.xform = plane.matrix;
+        this.entityShader.loadTransform(this.entity.xform);
     }
 
     draw() {

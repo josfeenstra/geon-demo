@@ -3,6 +3,7 @@
 // purpose: test creation of basic mesh shapes. Test UI
 
 import { Color } from "Engine/image/Color";
+import { Transform } from "Engine/math/Transform";
 import { Material } from "Engine/render/basics/Material";
 import { Model } from "Engine/render/basics/Model";
 import { DotShader } from "Engine/render/shaders-old/dot-shader";
@@ -142,7 +143,7 @@ export class PhongApp extends App {
 
         // let model = new Model(Matrix4.newIdentity(), rend.mesh, this.material);
         let model = Model.new(mesh, this.material);
-        let e = Entity.new(Matrix4.newTranslate(this.somePos), model);
+        let e = Entity.new(Transform.new(this.somePos), model);
         // this.phong.load(model, DrawSpeed.StaticDraw);
         this.phong.load(e, DrawSpeed.StaticDraw);
         this.lineRenderer.set(grid);

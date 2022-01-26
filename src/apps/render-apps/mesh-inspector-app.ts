@@ -126,7 +126,7 @@ export class MeshInspectorApp extends App {
                 this.ams.load(rend.mesh, DrawSpeed.StaticDraw);
                 break;
             case 4:
-                let model = Entity.new(Matrix4.newIdentity(), Model.new(rend.mesh, Material.default()));
+                let model = Model.new(rend.mesh, Material.default()).spawn();
                 break;
             default:
                 break;

@@ -2,7 +2,7 @@ import { Material } from "Engine/render/basics/Material";
 import { Model } from "Engine/render/basics/Model";
 import { LineShader } from "Engine/render/shaders-old/line-shader";
 import { PhongShader } from "Engine/render/shaders/PhongShader";
-import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, Entity, DrawTarget, TextureMeshShader, TexturedMeshShader, ShaderMesh, Rectangle3, InputHandler } from "Geon";
+import { App, Parameter, MultiVector3, Camera, DebugRenderer, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, Scene, Mesh, Matrix4, Domain3, Domain2, Cube, Entity, DrawTarget, TextureMeshShader, TexturedMeshShader, ShaderMesh, Rectangle3, InputHandler, Quaternion } from "Geon";
 
 export class DrawTargetApp extends App {
     // ui
@@ -58,10 +58,8 @@ export class DrawTargetApp extends App {
     update(input: InputHandler) {
         this.scene.camera.update(input);
         let r = 0.0005 * input.time.tick;
-        this.entity.position.multiply(Matrix4.newYRotation(r));
-        this.entity.position.multiply(Matrix4.newZRotation(-r));
-        this.entity.position.multiply(Matrix4.newXRotation(r));
-        this.ps.loadPosition(this.entity.position);
+        this.entity.xform.rot.add(Quaternion.fromEuler(r, -r, r));
+        this.ps.loadTransform(this.entity.xform);
     }
 
     draw() {
