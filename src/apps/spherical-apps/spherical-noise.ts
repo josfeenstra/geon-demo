@@ -182,7 +182,6 @@ export class SphericalNoise extends App {
     lockedHeight = 1.3;
     entityVelocity = 0.005;
     entityDirection = Vector3.unitX().scale(this.entityVelocity);
-    n = 0;
     myangle = 0;
 
 
@@ -197,8 +196,6 @@ export class SphericalNoise extends App {
         this.entityDirection = newPos.cross(cross).setLength(-this.entityVelocity);
 
         // rotate 
-        this.n = (this.n + 0.01);
-
         this.entity.xform.rot.setPose(cross, this.entityDirection);
         
         if (input.keys?.isDown(Key.A)) {
@@ -213,7 +210,7 @@ export class SphericalNoise extends App {
         this.camera.xform = Transform.new();
         this.camera.xform.pos.copy(this.entity.xform.pos);
         // this.camera.xform.rot.setAxisAngle(Vector3.unitZ(), this.myangle);
-        this.camera.xform.rot.copy(this.entity.xform.rot).multiply(Quaternion.fromEuler(Math.PI,0,0));
+        this.camera.xform.rot.copy(this.entity.xform.rot).multiply(Quaternion.fromEuler(Math.PI,0.4,0));
 
 
         // console.log(this.entity.xform);
