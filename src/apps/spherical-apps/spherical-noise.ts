@@ -99,6 +99,7 @@ export class SphericalNoise extends App {
         let e = new Entity(Transform.new(Vector3.new(0,0,1.3)), model);
         this.entity = e;
         this.entityShader.load(e);
+        this.camera.xform = Transform.new();
     }
 
     start() {
@@ -180,37 +181,46 @@ export class SphericalNoise extends App {
     }
 
     lockedHeight = 1.3;
+
     entityVelocity = 0.005;
     entityDirection = Vector3.unitX().scale(this.entityVelocity);
     myangle = 0;
+
+    falloffForwardMovement = 0;
+    falloffRotation = 0;
 
 
     updateEntity(input: InputHandler) {
         
         // update position
         let pos = this.entity.xform.pos;
-        let newPos = pos.add(this.entityDirection).setLength(this.lockedHeight);
+        // let newPos = 
+        if (input.keys?.isDown(Key.UpArrow)) {
+            this.falloffForwardMovement += 0.2;
+            // pos.add(this.entityDirection).setLength(this.lockedHeight);
+        } 
+        if (input.keys?.isDown(Key.DownArrow)) {
+            this.falloffForwardMovement -= 0.2;
+            // pos.sub(this.entityDirection).setLength(this.lockedHeight);
+        } 
+        this.falloffForwardMovement *= 0.9;
+        pos.add(this.entityDirection.scaled(this.falloffForwardMovement)).setLength(this.lockedHeight);
 
         // get new entityDirection
-        let cross = newPos.cross(this.entityDirection);
-        this.entityDirection = newPos.cross(cross).setLength(-this.entityVelocity);
+        let cross = pos.cross(this.entityDirection);
+        this.entityDirection = pos.cross(cross).setLength(-this.entityVelocity);
 
         // rotate 
         this.entity.xform.rot.setPose(cross, this.entityDirection);
-        
-        if (input.keys?.isDown(Key.A)) {
-            this.myangle += 0.01;
-        } 
-        if (input.keys?.isDown(Key.D)) {
-            this.myangle -= 0.01;
-        }
 
         // set camera
         this.camera.zoom = -2;
-        this.camera.xform = Transform.new();
-        this.camera.xform.pos.copy(this.entity.xform.pos);
+        this.camera.xform!.pos.copy(this.entity.xform.pos);
         // this.camera.xform.rot.setAxisAngle(Vector3.unitZ(), this.myangle);
-        this.camera.xform.rot.copy(this.entity.xform.rot).multiply(Quaternion.fromEuler(Math.PI,0.4,0));
+        this.camera.xform!.rot.copy(this.entity.xform.rot).multiply(Quaternion.fromEuler(Math.PI, 0.0, 0.0));
+
+        // IDEA: LerpValue
+
 
 
         // console.log(this.entity.xform);
@@ -229,17 +239,14 @@ export class SphericalNoise extends App {
 
         // rotate based upon input
         if (input.keys?.isDown(Key.LeftArrow)) {
-            this.entityDirection = this.entityDirection.rotated(newPos, 0.01);
+            this.falloffRotation += 0.002
+            // this.entityDirection = this.entityDirection.rotated(pos, );
         }
         if (input.keys?.isDown(Key.RightArrow)) {
-            this.entityDirection = this.entityDirection.rotated(newPos, -0.01);
+            this.falloffRotation -= 0.002
         } 
-        if (input.keys?.isDown(Key.UpArrow)) {
-            this.lockedHeight += 0.01;
-        } 
-        if (input.keys?.isDown(Key.DownArrow)) {
-            this.lockedHeight -= 0.01;
-        } 
+        this.entityDirection = this.entityDirection.rotated(pos, this.falloffRotation);
+        this.falloffRotation *= 0.9;
 
         if (input.keys?.isPressed(Key.Space)) {
             this.quatTest();
@@ -250,9 +257,9 @@ export class SphericalNoise extends App {
     }
 
     draw() {
-        this.meshRend.render(this.scene);
-        this.graphRend.render(this.scene);
-        this.debugRend.render(this.scene);
+        // this.meshRend.render(this.scene);
+        // this.graphRend.render(this.scene);
+        // this.debugRend.render(this.scene);
         this.phong.draw(this.scene);
         this.entityShader.draw(this.scene);
     }
