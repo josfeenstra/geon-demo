@@ -34,6 +34,7 @@ import { MarchingCubeApp } from "./apps/algo-apps/marching-app";
 import { MicApp } from "./apps/util-apps/mic-app";
 import { WaveApp } from "./apps/algo-apps/wave-app";
 import { SphericalNoise } from "./apps/spherical-apps/spherical-noise";
+import { WebMapApp } from "./apps/geomatics/webmap-app";
 
 function main() {
     // get references of all items on the canvas
@@ -50,6 +51,7 @@ function main() {
 
     // init swap app
     let appCollection = [
+        WebMapApp,
         SphericalNoise,
         WaveApp,
         MicApp,
