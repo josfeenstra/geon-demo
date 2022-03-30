@@ -30,7 +30,7 @@ export class TileTree {
         return new Tile(x, y, level);
     }
 
-    private getLevel(scale: number, factor=3) {
+    private getLevel(scale: number, factor=4) {
         
         let someWidth = this.width * factor;
         for (let level = 0; level < this.maxlevel; level++) {

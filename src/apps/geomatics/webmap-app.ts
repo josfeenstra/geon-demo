@@ -37,7 +37,7 @@ export class WebMapApp extends App {
     }
 
     async start() {
-        this.spawnAllOfLevel(4);
+        this.spawnAllOfLevel(3);
         // fill some state | fill up shaders
         
     }
