@@ -1,50 +1,112 @@
-import { App, Scene, DebugRenderer, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, LineShader, InputHandler, ImageMesh, WebIO, Bitmap } from "Geon";
+import { App, Scene, DebugRenderer, Camera, UI, MultiLine, Plane, Vector3, DrawSpeed, InputState, LineShader, InputHandler, ImageMesh, WebIO, Bitmap, SimpleMeshShader, COLOR, Circle3, Domain2, Vector2, Parameter } from "Geon";
+import { TileTree } from "./tiletree";
 
 export class WebMapApp extends App {
+
+    // state
+    loader = Loader.new()
+    cursor?: {pos: Vector2, distance: number}
+    tiletree: TileTree;
 
     // render
     scene: Scene;
     debug: DebugRenderer;
     grid: LineShader;
-    
+    plane = Plane.WorldXY();
+    cursorShader: LineShader;    
 
     constructor(gl: WebGLRenderingContext) {
         super(gl);
 
+        this.plane.khat = this.plane.khat.scale(-1);
+
         let canvas = gl.canvas as HTMLCanvasElement;
         let camera = new Camera(canvas, -2, true);
-        camera.setState([-5.6589, 293.12, -126.30, -2, 0.9580000000000057,0.5530000000000058]);
+        camera.setState([-139.61, 165.11, 0.0000, -571.4933778365955, 1.1197812838944499,-0.6372459341806297]);
+        camera.speed = 0.2;
+        camera.zoomDelta;
         this.grid = new LineShader(gl, [0.3, 0.3, 0.3, 1]);
         this.debug = DebugRenderer.new(gl);
         this.scene = new Scene(camera);
 
+
+        this.tiletree = new TileTree(Domain2.fromWH(0,0,256, 256), 18);
+        this.cursorShader = new LineShader(gl, COLOR.grey.data);
         // init some state
+        canvas.addEventListener("mousedown", this.onClick.bind(this));
     }
 
     async start() {
-        this.startGrid();
-
+        this.spawnAllOfLevel(4);
         // fill some state | fill up shaders
-    
+        
     }
 
-    ui(ui: UI) {}
+    onClick() {
+        console.log("click!!");
+        if (!this.cursor) return;
+        let tile = this.tiletree.getTile(this.cursor.distance, this.cursor.pos);
+        console.log(tile);
+        // this.request(tile.level, tile.x, tile.y);
 
-    startGrid() {
-        // let grid = MultiLine.fromGrid(Plane.WorldXY().moveTo(new Vector3(0, 0, -1)), 100, 2);
-        // this.grid.set(grid, DrawSpeed.StaticDraw);
+        for (let i = -1; i < 2; i++) {
+            for (let j = -1; j < 2; j++) {
+                this.request(tile.level, tile.x + i, tile.y + j);
+            }
+        }
+        console.log(this.scene.camera.zNear, this.scene.camera.zFar);
+    }
 
-        spawnAllOfLevel(6, this.debug);
+    ui(ui: UI) {
+        ui.addParameter(Parameter.new("camera.near", 0.1, 0.1, 1000, 1), (v) => {this.scene.camera.zNear = v});
+        ui.addParameter(Parameter.new("camera.far", 10000, 100, 20000, 1), (v) => {this.scene.camera.zFar = v});
     }
 
     update(input: InputHandler) {
-        this.scene.camera.update(input);
+        const c = this.scene.camera;
+        c.update(input);
+        this.updateCursor(input);
         // update state | fill up shaders
+    }
+
+    updateCursor(input: InputHandler) {
+        let ray = this.scene.camera.getMouseWorldRay(input.width, input.height, false);
+        let cursor = ray.at(ray.xPlane(this.plane));
+        let distance = ray.origin.disTo(cursor);
+        this.cursorShader.set(MultiLine.fromCircle(Circle3.newPlanar(cursor, distance / 200)));
+
+        // NOTE: i'm noticing that this 3d world does not have the right x, y and z axis...
+        cursor.y *= -1;
+        this.cursor = {pos: cursor.to2D(), distance};
     }
 
     draw() {
         // this.grid.render(this.scene);
         this.debug.render(this.scene);
+        this.cursorShader.render(this.scene);
+    }
+
+    request(level: number, x: number, y: number) {
+        this.loader.request(
+            () => load(level, x, y), 
+            (image) => addImageMesh(level, x, y, this.plane, image).then((im) => {
+                if (!im) return;
+                this.debug.set(im)
+            })
+        );
+    }
+    
+    spawnAllOfLevel(level: number) {
+        
+        let counter = 0;
+        let count = Math.pow(2, level);
+        for (let i = 0 ; i < count; i++) {
+            for (let j = 0; j < count; j++) {
+                this.request(level, i, j);
+                counter += 1;
+            }
+        }
+        console.log(counter);
     }
 }
 
@@ -54,37 +116,23 @@ function getAdress(z=0, x=0, y=0) {
 
 
 
-function spawnAllOfLevel(level: number, renderer: DebugRenderer) {
-    let loader = Loader.new();
-    let counter = 0;
-    let count = Math.pow(2, level);
-    for (let i = 0 ; i < count; i++) {
-        for (let j = 0; j < count; j++) {
-            // load(level, i, j)
-            //     .then(img => addImageMesh(level, i, j, img)
-            //     .then(im => renderer.set(im)))
-            //     .catch(e => console.log(e));
 
-            loader.request(
-                () => load(level, i, j), 
-                (image) => addImageMesh(level, i, j, image).then((im) => {
-                    renderer.set(im)
-                })
-            );
-            counter += 1;
-        }
-    }
-    console.log(counter);
-}
+async function addImageMesh(z: number, x: number, y: number, plane: Plane, image: HTMLImageElement) : Promise<ImageMesh | undefined> {
 
-async function addImageMesh(z: number, x: number, y: number, image: HTMLImageElement) : Promise<ImageMesh> {
+    if (z < 1) return undefined;
 
-    let size = 256;
+    let enlarger = 1;
+    let size = 256 * enlarger;
     let count = Math.pow(2, z);
+    let scale = 1 / count * enlarger;
     let posx = (x / count) * size;
     let posy = (y / count) * size; 
+    let pos = Vector3.new()
+        .add(plane.ihat.scaled(posx))
+        .add(plane.jhat.scaled(posy));
+    let tileplane = plane.clone().moveTo(pos);
 
-    return ImageMesh.new(image, Plane.WorldXY().moveTo(Vector3.new(posx, -posy)), 1 / count, false);
+    return ImageMesh.new(image, tileplane, scale, false, true, -1 -(z / 18));
 }
 
 
@@ -138,14 +186,15 @@ class Loader {
     }
 
     onRequestEnd(id: number) {
-        console.log(id);
+        // console.log(id);
         this.requests.delete(id);
         this.active -= 1;
 
+        // if there is a waitlist
         if (this.waitlist.length > 0) {
             let firstIn = this.waitlist.splice(0, 1)[0];
-            console.log(firstIn, this.active)
-            this.onRequestStart(firstIn);
+            // console.log(firstIn, this.active)
+            this.onRequestStart(firstIn); /// hmmmmmm... the thing should not be popped if onRequestStart is false... 
         }
     }
 
