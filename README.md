@@ -3,7 +3,7 @@ A number of demo project showcasing various features of the [Geon Engine](https:
 
 
 ## Live
-https://josfeenstra.nl/demo/geon/
+https://josfeenstra.nl/project/geon/#wave
 
 
 ## Install 
